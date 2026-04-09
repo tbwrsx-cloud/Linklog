@@ -459,7 +459,7 @@ select.ll-select:focus{border-color:var(--accent)}
 //  CONFIG
 // ══════════════════════════════════════════════
 const CLIENT_ID   = '762017486457-pr5c61sv7mrvdq3mbudt1uvkkk0l07um.apps.googleusercontent.com';
-const SCOPES      = 'https://www.googleapis.com/auth/drive.appdata';
+const SCOPES      = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
 const FILE_NAME   = 'linklog-data.json';
 
 // ══════════════════════════════════════════════
@@ -519,7 +519,7 @@ let tokenClient;
 function initTokenClient(){
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
-    scope: SCOPES + ' https://www.googleapis.com/auth/userinfo.email',
+    scope: SCOPES,
     callback: handleToken,
     error_callback: handleAuthError,
   });
@@ -581,18 +581,25 @@ async function handleToken(tokenResponse){
 
   try{
     await loadFromDrive();
-    setSyncStatus('ok','Synced');
+    setSyncStatus('ok','Synced with Google Drive ✓');
     scheduleAll();
     renderGoals();
     populateSubgoalDropdowns();
     checkExtensionImport();
   }catch(e){
     const msg = e.message||'';
-    const friendly = msg.includes('insufficientFilePermissions') || msg.includes('403')
-      ? '403: Drive permission denied. Go to Google Cloud Console → OAuth consent screen → add your email as a Test User, then sign in again.'
-      : 'Load failed: '+msg;
-    setSyncStatus('err', friendly);
-    console.error(e);
+    console.error('Drive load error:', e);
+    // Fall back to localStorage so app is still usable
+    const hadLocal = localLoad();
+    setSyncStatus('err',
+      msg.includes('403') || msg.includes('insufficient')
+        ? '⚠ Drive permission denied — using local storage. Fix: Google Cloud Console → OAuth consent screen → add your email as Test User & add drive.file scope.'
+        : '⚠ Drive unavailable — using local storage. ' + msg.slice(0,80)
+    );
+    scheduleAll();
+    renderGoals();
+    populateSubgoalDropdowns();
+    checkExtensionImport();
   }
 
   // Auto-refresh token before it expires (tokens last ~1 hour)
@@ -623,90 +630,116 @@ function manualSync(){
 }
 
 // ══════════════════════════════════════════════
-//  GOOGLE DRIVE — appDataFolder API
+//  GOOGLE DRIVE — drive.file scope
+//  Stores linklog-data.json in the user's root
+//  Drive (visible in My Drive). Falls back to
+//  localStorage if Drive is unavailable.
 // ══════════════════════════════════════════════
-async function driveReq(method, path, body, isUpload){
-  const base = isUpload
+const LS_BACKUP = 'll_backup';
+
+function localSave(){
+  try{ localStorage.setItem(LS_BACKUP, JSON.stringify({links,goals,savedAt:new Date().toISOString()})); }catch(e){}
+}
+function localLoad(){
+  try{
+    const d = JSON.parse(localStorage.getItem(LS_BACKUP)||'null');
+    if(d){ links=d.links||[]; goals=d.goals||[]; return true; }
+  }catch(e){}
+  return false;
+}
+
+async function driveReq(method, path, opts={}){
+  const base = opts.upload
     ? 'https://www.googleapis.com/upload/drive/v3'
     : 'https://www.googleapis.com/drive/v3';
+  const headers = {'Authorization':'Bearer '+accessToken};
+  if(opts.json) headers['Content-Type']='application/json';
+  if(opts.contentType) headers['Content-Type']=opts.contentType;
   const res = await fetch(base+path, {
     method,
-    headers:{
-      'Authorization':'Bearer '+accessToken,
-      ...(body&&!isUpload?{'Content-Type':'application/json'}:{}),
-      ...(isUpload?{'Content-Type':'application/json'}:{})
-    },
-    body: body ? (typeof body==='string'?body:JSON.stringify(body)) : undefined
+    headers,
+    body: opts.body
   });
-  if(!res.ok){ const t=await res.text(); throw new Error(t); }
-  if(res.status===204) return null;
-  return res.json();
+  if(!res.ok){
+    const t = await res.text();
+    throw new Error(t);
+  }
+  if(res.status===204||res.headers.get('content-length')==='0') return null;
+  const ct = res.headers.get('content-type')||'';
+  return ct.includes('json') ? res.json() : res.text();
 }
 
 async function loadFromDrive(){
-  // Find existing file
+  // Search for existing file in Drive root (drive.file scope only sees files
+  // created by this app)
   const list = await driveReq('GET',
-    `/files?spaces=appDataFolder&q=name='${FILE_NAME}'&fields=files(id,name)&pageSize=5`);
-  if(list.files && list.files.length > 0){
-    driveFileId = list.files[0].id;
-    const content = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,
-      {headers:{'Authorization':'Bearer '+accessToken}}
-    ).then(r=>r.json());
+    `/files?q=name='${FILE_NAME}' and trashed=false&fields=files(id,name,modifiedTime)&pageSize=5`);
+
+  if(list && list.files && list.files.length > 0){
+    // Use the most recently modified one
+    const sorted = list.files.sort((a,b)=>new Date(b.modifiedTime)-new Date(a.modifiedTime));
+    driveFileId = sorted[0].id;
+    const raw = await driveReq('GET', `/files/${driveFileId}?alt=media`);
+    const content = typeof raw === 'string' ? JSON.parse(raw) : raw;
     links = content.links || [];
     goals = content.goals || [];
+    localSave(); // keep local backup in sync
   } else {
-    // First time — create empty file
-    links=[]; goals=[];
+    // First run — load from localStorage backup if exists, then create Drive file
+    localLoad();
     await saveToDrive();
   }
 }
 
 async function saveToDrive(){
   if(!accessToken) return;
-  const payload = JSON.stringify({links, goals, savedAt: new Date().toISOString()});
+  const payload = JSON.stringify({links, goals, savedAt: new Date().toISOString()}, null, 2);
+  localSave(); // always save locally too
+
   if(driveFileId){
-    // Update existing
-    await fetch(
-      `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,
-      {method:'PATCH', headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'}, body:payload}
+    // Update existing file content
+    await driveReq('PATCH',
+      `/files/${driveFileId}?uploadType=media`,
+      { upload:true, contentType:'application/json', body:payload }
     );
   } else {
-    // Create new in appDataFolder
-    const meta = await driveReq('POST',
-      `/files?uploadType=multipart`, null);
-    // Use multipart
-    const boundary='=====linklog=====';
-    const multipart=[
+    // Create new file using multipart upload
+    const boundary = '-------linklogboundary';
+    const meta = JSON.stringify({ name: FILE_NAME, mimeType: 'application/json' });
+    const body = [
       `--${boundary}`,
       'Content-Type: application/json; charset=UTF-8',
       '',
-      JSON.stringify({name:FILE_NAME, parents:['appDataFolder']}),
+      meta,
       `--${boundary}`,
       'Content-Type: application/json',
       '',
       payload,
       `--${boundary}--`
     ].join('\r\n');
-    const res = await fetch(
-      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-      {method:'POST', headers:{'Authorization':'Bearer '+accessToken,'Content-Type':`multipart/related; boundary="${boundary}"`}, body:multipart}
+    const res = await driveReq('POST',
+      '/files?uploadType=multipart',
+      { upload:true, contentType:`multipart/related; boundary="${boundary}"`, body }
     );
-    const j = await res.json();
-    driveFileId = j.id;
+    if(res && res.id) driveFileId = res.id;
   }
 }
 
 // Debounced save — batches rapid changes into one write
 function save(){
+  localSave(); // instant local backup on every change
   clearTimeout(saveTimer);
   setSyncStatus('saving','Saving…');
   saveTimer = setTimeout(async ()=>{
+    if(!accessToken){
+      setSyncStatus('ok','Saved locally');
+      return;
+    }
     try{
       await saveToDrive();
       setSyncStatus('ok','Saved ✓ '+fmtTime(new Date().toISOString()));
     }catch(e){
-      setSyncStatus('err','Save failed');
+      setSyncStatus('err','Drive save failed — data kept locally');
       console.error(e);
     }
   }, 1200);

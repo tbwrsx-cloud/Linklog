@@ -741,6 +741,7 @@ async function handleToken(tokenResponse){
     await loadFromDrive();
     setSyncStatus('ok','Synced');
     scheduleAll();
+    handleShareTarget();
     renderGoals();
     populateSubgoalDropdowns();
     checkExtensionImport();
@@ -1830,12 +1831,7 @@ function handleShareTarget() {
   prefill();
 }
 
-// Called after sign-in completes (app is ready)
-const _origScheduleAll = scheduleAll;
-function scheduleAll() {
-  _origScheduleAll();
-  handleShareTarget();
-}
+
 
 ['editOverlay','editObsOverlay','editGoalOverlay','editSubgoalOverlay'].forEach(id=>{
 });

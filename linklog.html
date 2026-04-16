@@ -227,6 +227,18 @@ select.ll-select:focus{border-color:var(--accent)}
 .empty{text-align:center;padding:44px 0;color:var(--muted);font-size:.78rem;font-style:italic}
 .empty span{display:block;font-size:2rem;margin-bottom:10px}
 
+/* ── X Bookmark preview ── */
+.xbm-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:.76rem}
+.xbm-item:last-child{border-bottom:none}
+.xbm-item input[type=checkbox]{flex-shrink:0;margin-top:3px;accent-color:var(--accent)}
+.xbm-item-body{flex:1;min-width:0}
+.xbm-tweet-text{font-size:.78rem;color:var(--ink);line-height:1.55;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.xbm-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.xbm-author{font-size:.63rem;color:var(--sub);font-weight:500}
+.xbm-date{font-size:.6rem;color:var(--muted)}
+.xbm-url{font-size:.6rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+.xbm-dup{font-size:.58rem;background:rgba(138,127,112,.12);color:var(--muted);border:1px solid var(--line);border-radius:2px;padding:1px 5px;letter-spacing:.05em;text-transform:uppercase}
+
 @media(max-width:540px){
   .header-title{font-size:1.8rem}
   .form-row{flex-direction:column}
@@ -294,6 +306,7 @@ select.ll-select:focus{border-color:var(--accent)}
     <button class="tab-btn" onclick="switchTab('links')">⊕ Links</button>
     <button class="tab-btn" onclick="switchTab('calendar')">📅 Calendar</button>
     <button class="tab-btn" onclick="switchTab('all')">◈ All Entries</button>
+    <button class="tab-btn" onclick="switchTab('xbookmarks')">𝕏 Bookmarks</button>
   </div>
 
   <!-- ═══ GOALS PANEL ═══ -->
@@ -372,6 +385,120 @@ select.ll-select:focus{border-color:var(--accent)}
     </div>
     <div id="allList"></div>
   </div>
+
+  <!-- ═══ X BOOKMARKS PANEL ═══ -->
+  <div class="panel" id="panel-xbookmarks">
+
+    <div class="form-card">
+      <h3 style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.2rem">𝕏</span> Import X / Twitter Bookmarks
+      </h3>
+      <p style="font-size:.72rem;color:var(--muted);line-height:1.7;margin-bottom:14px">
+        Uses the X API v2 Bookmarks endpoint. You need a <strong>Bearer Token</strong> (app-only) and
+        your numeric <strong>User ID</strong>. Both are available from the
+        <a href="https://developer.twitter.com/en/portal/dashboard" target="_blank" rel="noopener"
+           style="color:var(--sub)">X Developer Portal</a>.
+      </p>
+
+      <!-- Step 1 – credentials -->
+      <div id="xStep1">
+        <div class="section-label" style="margin-bottom:10px">Step 1 — Credentials</div>
+        <span class="modal-label">Bearer Token (from Developer Portal → Keys &amp; Tokens)</span>
+        <div class="form-row" style="margin-bottom:10px">
+          <input type="password" id="xBearerToken" placeholder="AAAAAAAAAAAAAAAAAAAAAxxxxxxx…"
+                 style="flex:1;min-width:200px;font-size:.73rem" />
+          <button class="btn btn-ghost btn-sm" onclick="xTogglePw()"
+                  title="Show/hide token">👁</button>
+        </div>
+        <span class="modal-label">Your numeric User ID
+          <a href="https://tweeterid.com" target="_blank" rel="noopener"
+             style="color:var(--sub);font-size:.58rem;margin-left:4px">(look up ↗)</a>
+        </span>
+        <div class="form-row" style="margin-bottom:14px">
+          <input type="text" id="xUserId" placeholder="123456789" style="flex:1;min-width:140px;font-size:.73rem" />
+        </div>
+
+        <!-- CORS notice -->
+        <div style="background:rgba(26,92,138,.07);border:1px solid rgba(26,92,138,.2);border-radius:2px;
+                    padding:10px 12px;font-size:.68rem;color:var(--sub);line-height:1.65;margin-bottom:14px">
+          <strong>⚠ Browser CORS note:</strong> X's API blocks direct browser requests.
+          The fetch below is routed through <code>corsproxy.io</code>. If that proxy is unavailable,
+          use the <em>Paste JSON</em> tab instead — run the API call yourself (curl / Postman) and
+          paste the raw response.
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="xFetchBookmarks()">↓ Fetch Bookmarks via API</button>
+          <button class="btn btn-ghost" onclick="xShowPasteTab()">✎ Paste JSON instead</button>
+          <button class="btn btn-ghost btn-sm" onclick="xRememberCreds()"
+                  title="Save token &amp; ID to sessionStorage so you don't re-type">💾 Remember this session</button>
+        </div>
+        <div id="xFetchStatus" style="margin-top:10px;font-size:.72rem;color:var(--muted);min-height:20px"></div>
+      </div>
+
+      <!-- Paste JSON fallback -->
+      <div id="xPasteSection" style="display:none;margin-top:4px">
+        <div class="section-label" style="margin-bottom:8px">Paste API Response JSON</div>
+        <p style="font-size:.68rem;color:var(--muted);margin-bottom:8px;line-height:1.6">
+          Run this in a terminal (replace <code>TOKEN</code> and <code>UID</code>):<br>
+          <code style="display:block;background:var(--cream);border:1px solid var(--line);border-radius:2px;
+                        padding:6px 10px;margin-top:5px;font-size:.65rem;word-break:break-all">
+            curl -H "Authorization: Bearer TOKEN" \<br>
+            "https://api.twitter.com/2/users/UID/bookmarks?tweet.fields=created_at,author_id,text&expansions=author_id&max_results=100"
+          </code>
+        </p>
+        <textarea id="xPasteJson" rows="7" style="width:100%;font-size:.68rem;font-family:'DM Mono',monospace;
+                  background:var(--cream);border:1px solid var(--line);border-radius:2px;
+                  padding:8px;color:var(--ink);outline:none;resize:vertical"
+                  placeholder='{"data":[{"id":"...","text":"..."}],"meta":{…}}'></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="xProcessPasted()">↑ Import Pasted JSON</button>
+          <button class="btn btn-ghost" onclick="xHidePasteTab()">← Back</button>
+        </div>
+        <div id="xPasteStatus" style="margin-top:8px;font-size:.72rem;color:var(--muted);min-height:18px"></div>
+      </div>
+    </div>
+
+    <!-- Step 2 – preview & import -->
+    <div id="xPreviewSection" style="display:none">
+      <div class="section-label">Step 2 — Review &amp; Import</div>
+
+      <div id="xPreviewStats" style="font-size:.72rem;color:var(--muted);margin-bottom:12px"></div>
+
+      <!-- Filter / tag controls -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+        <span style="font-size:.68rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">Default tag:</span>
+        <input type="text" id="xDefaultTag" value="twitter-bookmark"
+               style="width:140px;font-family:'DM Mono',monospace;font-size:.73rem;
+                      background:var(--cream);border:1px solid var(--line);border-radius:2px;
+                      padding:5px 9px;color:var(--ink);outline:none" />
+        <span style="font-size:.68rem;color:var(--muted);margin-left:4px;letter-spacing:.06em;text-transform:uppercase">Skip duplicates:</span>
+        <input type="checkbox" id="xSkipDups" checked style="width:auto;accent-color:var(--accent)" />
+        <input type="text" id="xFilterText" placeholder="Filter preview…"
+               style="flex:1;min-width:120px;font-family:'DM Mono',monospace;font-size:.73rem;
+                      background:var(--cream);border:1px solid var(--line);border-radius:2px;
+                      padding:5px 9px;color:var(--ink);outline:none"
+               oninput="xRenderPreview()" />
+      </div>
+
+      <!-- Select all / none -->
+      <div style="display:flex;gap:8px;margin-bottom:8px;font-size:.68rem;color:var(--muted)">
+        <button class="btn btn-ghost btn-sm" onclick="xSelectAll(true)">Select all</button>
+        <button class="btn btn-ghost btn-sm" onclick="xSelectAll(false)">Deselect all</button>
+        <span id="xSelCount" style="margin-left:auto;align-self:center"></span>
+      </div>
+
+      <div id="xPreviewList" style="max-height:420px;overflow-y:auto;border:1px solid var(--line);
+           border-radius:2px;background:var(--cream)"></div>
+
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn btn-green" onclick="xDoImport()">✓ Import Selected</button>
+        <button class="btn btn-ghost" onclick="xCancelPreview()">✕ Cancel</button>
+        <span id="xImportStatus" style="font-size:.72rem;color:var(--muted);align-self:center"></span>
+      </div>
+    </div>
+
+  </div><!-- /panel-xbookmarks -->
 
 </div><!-- /container -->
 
@@ -459,7 +586,7 @@ select.ll-select:focus{border-color:var(--accent)}
 //  CONFIG
 // ══════════════════════════════════════════════
 const CLIENT_ID   = '762017486457-pr5c61sv7mrvdq3mbudt1uvkkk0l07um.apps.googleusercontent.com';
-const SCOPES      = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
+const SCOPES      = 'https://www.googleapis.com/auth/drive.appdata';
 const FILE_NAME   = 'linklog-data.json';
 
 // ══════════════════════════════════════════════
@@ -519,7 +646,7 @@ let tokenClient;
 function initTokenClient(){
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
-    scope: SCOPES,
+    scope: SCOPES + ' https://www.googleapis.com/auth/userinfo.email',
     callback: handleToken,
     error_callback: handleAuthError,
   });
@@ -581,25 +708,18 @@ async function handleToken(tokenResponse){
 
   try{
     await loadFromDrive();
-    setSyncStatus('ok','Synced with Google Drive ✓');
+    setSyncStatus('ok','Synced');
     scheduleAll();
     renderGoals();
     populateSubgoalDropdowns();
     checkExtensionImport();
   }catch(e){
     const msg = e.message||'';
-    console.error('Drive load error:', e);
-    // Fall back to localStorage so app is still usable
-    const hadLocal = localLoad();
-    setSyncStatus('err',
-      msg.includes('403') || msg.includes('insufficient')
-        ? '⚠ Drive permission denied — using local storage. Fix: Google Cloud Console → OAuth consent screen → add your email as Test User & add drive.file scope.'
-        : '⚠ Drive unavailable — using local storage. ' + msg.slice(0,80)
-    );
-    scheduleAll();
-    renderGoals();
-    populateSubgoalDropdowns();
-    checkExtensionImport();
+    const friendly = msg.includes('insufficientFilePermissions') || msg.includes('403')
+      ? '403: Drive permission denied. Go to Google Cloud Console → OAuth consent screen → add your email as a Test User, then sign in again.'
+      : 'Load failed: '+msg;
+    setSyncStatus('err', friendly);
+    console.error(e);
   }
 
   // Auto-refresh token before it expires (tokens last ~1 hour)
@@ -630,116 +750,90 @@ function manualSync(){
 }
 
 // ══════════════════════════════════════════════
-//  GOOGLE DRIVE — drive.file scope
-//  Stores linklog-data.json in the user's root
-//  Drive (visible in My Drive). Falls back to
-//  localStorage if Drive is unavailable.
+//  GOOGLE DRIVE — appDataFolder API
 // ══════════════════════════════════════════════
-const LS_BACKUP = 'll_backup';
-
-function localSave(){
-  try{ localStorage.setItem(LS_BACKUP, JSON.stringify({links,goals,savedAt:new Date().toISOString()})); }catch(e){}
-}
-function localLoad(){
-  try{
-    const d = JSON.parse(localStorage.getItem(LS_BACKUP)||'null');
-    if(d){ links=d.links||[]; goals=d.goals||[]; return true; }
-  }catch(e){}
-  return false;
-}
-
-async function driveReq(method, path, opts={}){
-  const base = opts.upload
+async function driveReq(method, path, body, isUpload){
+  const base = isUpload
     ? 'https://www.googleapis.com/upload/drive/v3'
     : 'https://www.googleapis.com/drive/v3';
-  const headers = {'Authorization':'Bearer '+accessToken};
-  if(opts.json) headers['Content-Type']='application/json';
-  if(opts.contentType) headers['Content-Type']=opts.contentType;
   const res = await fetch(base+path, {
     method,
-    headers,
-    body: opts.body
+    headers:{
+      'Authorization':'Bearer '+accessToken,
+      ...(body&&!isUpload?{'Content-Type':'application/json'}:{}),
+      ...(isUpload?{'Content-Type':'application/json'}:{})
+    },
+    body: body ? (typeof body==='string'?body:JSON.stringify(body)) : undefined
   });
-  if(!res.ok){
-    const t = await res.text();
-    throw new Error(t);
-  }
-  if(res.status===204||res.headers.get('content-length')==='0') return null;
-  const ct = res.headers.get('content-type')||'';
-  return ct.includes('json') ? res.json() : res.text();
+  if(!res.ok){ const t=await res.text(); throw new Error(t); }
+  if(res.status===204) return null;
+  return res.json();
 }
 
 async function loadFromDrive(){
-  // Search for existing file in Drive root (drive.file scope only sees files
-  // created by this app)
+  // Find existing file
   const list = await driveReq('GET',
-    `/files?q=name='${FILE_NAME}' and trashed=false&fields=files(id,name,modifiedTime)&pageSize=5`);
-
-  if(list && list.files && list.files.length > 0){
-    // Use the most recently modified one
-    const sorted = list.files.sort((a,b)=>new Date(b.modifiedTime)-new Date(a.modifiedTime));
-    driveFileId = sorted[0].id;
-    const raw = await driveReq('GET', `/files/${driveFileId}?alt=media`);
-    const content = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    `/files?spaces=appDataFolder&q=name='${FILE_NAME}'&fields=files(id,name)&pageSize=5`);
+  if(list.files && list.files.length > 0){
+    driveFileId = list.files[0].id;
+    const content = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,
+      {headers:{'Authorization':'Bearer '+accessToken}}
+    ).then(r=>r.json());
     links = content.links || [];
     goals = content.goals || [];
-    localSave(); // keep local backup in sync
   } else {
-    // First run — load from localStorage backup if exists, then create Drive file
-    localLoad();
+    // First time — create empty file
+    links=[]; goals=[];
     await saveToDrive();
   }
 }
 
 async function saveToDrive(){
   if(!accessToken) return;
-  const payload = JSON.stringify({links, goals, savedAt: new Date().toISOString()}, null, 2);
-  localSave(); // always save locally too
-
+  const payload = JSON.stringify({links, goals, savedAt: new Date().toISOString()});
   if(driveFileId){
-    // Update existing file content
-    await driveReq('PATCH',
-      `/files/${driveFileId}?uploadType=media`,
-      { upload:true, contentType:'application/json', body:payload }
+    // Update existing
+    await fetch(
+      `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,
+      {method:'PATCH', headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'}, body:payload}
     );
   } else {
-    // Create new file using multipart upload
-    const boundary = '-------linklogboundary';
-    const meta = JSON.stringify({ name: FILE_NAME, mimeType: 'application/json' });
-    const body = [
+    // Create new in appDataFolder
+    const meta = await driveReq('POST',
+      `/files?uploadType=multipart`, null);
+    // Use multipart
+    const boundary='=====linklog=====';
+    const multipart=[
       `--${boundary}`,
       'Content-Type: application/json; charset=UTF-8',
       '',
-      meta,
+      JSON.stringify({name:FILE_NAME, parents:['appDataFolder']}),
       `--${boundary}`,
       'Content-Type: application/json',
       '',
       payload,
       `--${boundary}--`
     ].join('\r\n');
-    const res = await driveReq('POST',
-      '/files?uploadType=multipart',
-      { upload:true, contentType:`multipart/related; boundary="${boundary}"`, body }
+    const res = await fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+      {method:'POST', headers:{'Authorization':'Bearer '+accessToken,'Content-Type':`multipart/related; boundary="${boundary}"`}, body:multipart}
     );
-    if(res && res.id) driveFileId = res.id;
+    const j = await res.json();
+    driveFileId = j.id;
   }
 }
 
 // Debounced save — batches rapid changes into one write
 function save(){
-  localSave(); // instant local backup on every change
   clearTimeout(saveTimer);
   setSyncStatus('saving','Saving…');
   saveTimer = setTimeout(async ()=>{
-    if(!accessToken){
-      setSyncStatus('ok','Saved locally');
-      return;
-    }
     try{
       await saveToDrive();
       setSyncStatus('ok','Saved ✓ '+fmtTime(new Date().toISOString()));
     }catch(e){
-      setSyncStatus('err','Drive save failed — data kept locally');
+      setSyncStatus('err','Save failed');
       console.error(e);
     }
   }, 1200);
@@ -804,14 +898,15 @@ function setDate(){
   document.getElementById('headerDate').innerHTML=d.toLocaleDateString('en-IN',{weekday:'long'})+'<br>'+d.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
 }
 function switchTab(name){
-  const tabs=['goals','links','calendar','all'];
+  const tabs=['goals','links','calendar','all','xbookmarks'];
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',tabs[i]===name));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
-  if(name==='goals')   renderGoals();
-  if(name==='links')   {populateSubgoalDropdowns();renderLinks();}
-  if(name==='calendar') renderCalendar();
-  if(name==='all')      renderAll();
+  if(name==='goals')       renderGoals();
+  if(name==='links')       {populateSubgoalDropdowns();renderLinks();}
+  if(name==='calendar')    renderCalendar();
+  if(name==='all')         renderAll();
+  if(name==='xbookmarks')  xLoadSavedCreds();
 }
 
 // ══════════════════════════════════════════════
@@ -1371,7 +1466,262 @@ function showImportDialog(bookmarks) {
 
 // Run import check on load (after auth completes, inside handleToken)
 
-['editOverlay','editObsOverlay','editGoalOverlay','editSubgoalOverlay'].forEach(id=>{
+
+// ══════════════════════════════════════════════
+//  X (TWITTER) BOOKMARKS IMPORT
+// ══════════════════════════════════════════════
+// State
+let xRawBookmarks = []; // [{id, text, author_id, author_username, created_at, url}]
+
+// ── Credential helpers ──────────────────────
+function xGetCreds(){
+  return {
+    token: document.getElementById('xBearerToken').value.trim(),
+    uid:   document.getElementById('xUserId').value.trim()
+  };
+}
+function xTogglePw(){
+  const inp = document.getElementById('xBearerToken');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function xRememberCreds(){
+  const {token, uid} = xGetCreds();
+  if(!token || !uid){ xStatus('xFetchStatus','Enter both fields first.','err'); return; }
+  sessionStorage.setItem('ll_xtoken', token);
+  sessionStorage.setItem('ll_xuid', uid);
+  xStatus('xFetchStatus','Saved for this session.','ok');
+}
+function xLoadSavedCreds(){
+  const t=sessionStorage.getItem('ll_xtoken'), u=sessionStorage.getItem('ll_xuid');
+  if(t) document.getElementById('xBearerToken').value=t;
+  if(u) document.getElementById('xUserId').value=u;
+}
+
+// ── Paste JSON tab ───────────────────────────
+function xShowPasteTab(){
+  document.getElementById('xStep1').style.display='none';
+  document.getElementById('xPasteSection').style.display='block';
+}
+function xHidePasteTab(){
+  document.getElementById('xPasteSection').style.display='none';
+  document.getElementById('xStep1').style.display='block';
+}
+
+// ── Status helper ────────────────────────────
+function xStatus(elId, msg, type){
+  const el=document.getElementById(elId);
+  if(!el) return;
+  el.textContent=msg;
+  el.style.color = type==='err' ? 'var(--accent)' : type==='ok' ? 'var(--accent2)' : 'var(--muted)';
+}
+
+// ── Fetch via CORS proxy ─────────────────────
+async function xFetchBookmarks(){
+  const {token, uid} = xGetCreds();
+  if(!token){ xStatus('xFetchStatus','Enter your Bearer Token.','err'); return; }
+  if(!uid || !/^\d+$/.test(uid)){ xStatus('xFetchStatus','Enter a valid numeric User ID.','err'); return; }
+
+  xStatus('xFetchStatus','Fetching…','');
+  xRawBookmarks = [];
+
+  const PROXY = 'https://corsproxy.io/?';
+  const fields = 'tweet.fields=created_at,author_id,text,entities&expansions=author_id&user.fields=username,name&max_results=100';
+  let nextToken = null;
+  let page = 0;
+
+  try {
+    do {
+      page++;
+      const paging = nextToken ? `&pagination_token=${encodeURIComponent(nextToken)}` : '';
+      const apiUrl = `https://api.twitter.com/2/users/${uid}/bookmarks?${fields}${paging}`;
+      const proxied = PROXY + encodeURIComponent(apiUrl);
+
+      xStatus('xFetchStatus', `Fetching page ${page}…`, '');
+
+      const res = await fetch(proxied, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        // Try to parse X error
+        let friendly = `HTTP ${res.status}`;
+        try { const j=JSON.parse(errText); friendly = j.detail || j.title || friendly; } catch{}
+        if(res.status === 403) friendly = '403 Forbidden — your app may not have Bookmarks read permission (needs OAuth 2.0 + "Read and write and Direct message" access, or a project with Bookmarks scope).';
+        if(res.status === 401) friendly = '401 Unauthorized — check your Bearer Token.';
+        xStatus('xFetchStatus', friendly, 'err');
+        return;
+      }
+
+      const json = await res.json();
+      xProcessApiResponse(json);
+      nextToken = json.meta?.next_token || null;
+
+    } while (nextToken && page < 10); // cap at 10 pages (1000 tweets)
+
+    xStatus('xFetchStatus', `Fetched ${xRawBookmarks.length} bookmarks.`, 'ok');
+    xShowPreview();
+  } catch(e) {
+    xStatus('xFetchStatus',
+      'Network error: ' + e.message + ' — CORS may be blocking this. Try the Paste JSON fallback.',
+      'err');
+  }
+}
+
+// ── Process pasted JSON ──────────────────────
+function xProcessPasted(){
+  const raw = document.getElementById('xPasteJson').value.trim();
+  if(!raw){ xStatus('xPasteStatus','Paste JSON first.','err'); return; }
+  try {
+    const json = JSON.parse(raw);
+    xRawBookmarks = [];
+    xProcessApiResponse(json);
+    if(!xRawBookmarks.length){ xStatus('xPasteStatus','No tweets found in JSON.','err'); return; }
+    xStatus('xPasteStatus', `Found ${xRawBookmarks.length} bookmarks.`, 'ok');
+    xHidePasteTab();
+    xShowPreview();
+  } catch(e) {
+    xStatus('xPasteStatus', 'Invalid JSON: ' + e.message, 'err');
+  }
+}
+
+// ── Parse API response into xRawBookmarks ────
+function xProcessApiResponse(json){
+  if(!json.data) return;
+  // Build author map from expansions
+  const authorMap = {};
+  (json.includes?.users || []).forEach(u => { authorMap[u.id] = u; });
+
+  json.data.forEach(tweet => {
+    const author = authorMap[tweet.author_id] || {};
+    const username = author.username || tweet.author_id || 'unknown';
+    const tweetUrl = `https://twitter.com/${username}/status/${tweet.id}`;
+    xRawBookmarks.push({
+      id:          tweet.id,
+      text:        tweet.text || '',
+      author_id:   tweet.author_id || '',
+      username:    username,
+      name:        author.name || username,
+      created_at:  tweet.created_at || new Date().toISOString(),
+      url:         tweetUrl
+    });
+  });
+}
+
+// ── Show preview panel ───────────────────────
+function xShowPreview(){
+  document.getElementById('xPreviewSection').style.display = 'block';
+  document.getElementById('xPreviewSection').scrollIntoView({behavior:'smooth', block:'start'});
+  xRenderPreview();
+}
+
+function xRenderPreview(){
+  const q = (document.getElementById('xFilterText').value || '').toLowerCase();
+  const existingUrls = new Set(links.map(l => l.url));
+  const list = document.getElementById('xPreviewList');
+
+  const items = xRawBookmarks.filter(b =>
+    !q || b.text.toLowerCase().includes(q) || b.username.toLowerCase().includes(q)
+  );
+
+  const newCount  = items.filter(b => !existingUrls.has(b.url)).length;
+  const dupCount  = items.filter(b =>  existingUrls.has(b.url)).length;
+  document.getElementById('xPreviewStats').textContent =
+    `${xRawBookmarks.length} fetched · ${newCount} new · ${dupCount} already in LinkLog`;
+
+  if(!items.length){
+    list.innerHTML='<div class="empty"><span>◈</span>No bookmarks match.</div>';
+    xUpdateSelCount();
+    return;
+  }
+
+  list.innerHTML = items.map(b => {
+    const isDup = existingUrls.has(b.url);
+    const dateStr = b.created_at ? fmt(b.created_at) : '';
+    return `<div class="xbm-item" data-id="${escHtml(b.id)}">
+      <input type="checkbox" class="xbm-chk" data-id="${escHtml(b.id)}" ${isDup?'':'checked'}
+             onchange="xUpdateSelCount()" />
+      <div class="xbm-item-body">
+        <div class="xbm-tweet-text">${escHtml(b.text)}</div>
+        <div class="xbm-meta">
+          <span class="xbm-author">@${escHtml(b.username)}</span>
+          <span class="xbm-date">${dateStr}</span>
+          <a class="xbm-url" href="${escHtml(b.url)}" target="_blank" rel="noopener">${escHtml(b.url)}</a>
+          ${isDup ? '<span class="xbm-dup">duplicate</span>' : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  xUpdateSelCount();
+}
+
+function xUpdateSelCount(){
+  const total = document.querySelectorAll('.xbm-chk').length;
+  const checked = document.querySelectorAll('.xbm-chk:checked').length;
+  document.getElementById('xSelCount').textContent = `${checked} / ${total} selected`;
+}
+
+function xSelectAll(checked){
+  document.querySelectorAll('.xbm-chk').forEach(c => c.checked = checked);
+  xUpdateSelCount();
+}
+
+function xCancelPreview(){
+  document.getElementById('xPreviewSection').style.display='none';
+  xRawBookmarks=[];
+}
+
+// ── Do the actual import ─────────────────────
+function xDoImport(){
+  const tag = (document.getElementById('xDefaultTag').value.trim() || 'twitter-bookmark');
+  const skipDups = document.getElementById('xSkipDups').checked;
+  const existingUrls = new Set(links.map(l => l.url));
+
+  const checked = [...document.querySelectorAll('.xbm-chk:checked')].map(c => c.dataset.id);
+  if(!checked.length){ xStatus('xImportStatus','Select at least one bookmark.','err'); return; }
+
+  const toImport = xRawBookmarks.filter(b => {
+    if(!checked.includes(b.id)) return false;
+    if(skipDups && existingUrls.has(b.url)) return false;
+    return true;
+  });
+
+  if(!toImport.length){
+    xStatus('xImportStatus', 'All selected are duplicates — uncheck "Skip duplicates" to import anyway.', 'err');
+    return;
+  }
+
+  toImport.forEach(b => {
+    // Use tweet text first 80 chars as title, fallback to URL
+    const title = b.text.replace(/\s+/g,' ').slice(0, 80) + (b.text.length > 80 ? '…' : '');
+    links.unshift({
+      id:           uid(),
+      url:          b.url,
+      title:        title || b.url,
+      tag:          tag,
+      note:         b.text, // full tweet text in note
+      subgoalId:    '',
+      date:         b.created_at || new Date().toISOString(),
+      visits:       1,
+      lastVisit:    b.created_at || new Date().toISOString(),
+      observations: []
+    });
+  });
+
+  save();
+  renderLinks();
+  xStatus('xImportStatus', `✓ Imported ${toImport.length} bookmarks!`, 'ok');
+
+  // Refresh preview to show new duplicates
+  setTimeout(() => xRenderPreview(), 400);
+
+  // Switch to links tab after a moment
+  setTimeout(() => switchTab('links'), 1500);
+}
+
+// (xLoadSavedCreds is called via switchTab above)
+
   document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById(id).classList.remove('open');});
 });
 document.addEventListener('keydown',e=>{

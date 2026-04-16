@@ -9,6 +9,11 @@
 <!-- Google Identity Services -->
 <meta name="google-signin-client_id" content="762017486457-pr5c61sv7mrvdq3mbudt1uvkkk0l07um.apps.googleusercontent.com">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8451a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LinkLog">
 
 <style>
 :root{--ink:#1a1410;--paper:#f5f0e8;--cream:#ede7d6;--accent:#c8451a;--accent2:#2a6b4f;--alarm:#7b3fa0;--muted:#8a7f70;--line:#d4cabb;--tag-bg:#e8e0ce;--sub:#1a5c8a}
@@ -1771,8 +1776,68 @@ function xDoImport(){
 
 // (xLoadSavedCreds is called via switchTab above)
 
+
+// ══════════════════════════════════════════════
+//  SERVICE WORKER REGISTRATION
+// ══════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+
+// ══════════════════════════════════════════════
+//  PWA SHARE TARGET HANDLER
+//  Reads ?share_url= / ?share_title= / ?share_text=
+//  injected by Android share sheet, pre-fills the
+//  Add Link form and switches to the Links tab.
+// ══════════════════════════════════════════════
+function handleShareTarget() {
+  const params = new URLSearchParams(window.location.search);
+  const sharedUrl   = params.get('share_url')   || '';
+  const sharedTitle = params.get('share_title') || '';
+  const sharedText  = params.get('share_text')  || '';
+
+  if (!sharedUrl && !sharedText) return;
+
+  // Extract URL — might be in share_text if app sends text+url
+  let url = sharedUrl;
+  if (!url) {
+    const match = sharedText.match(/https?:\/\/\S+/);
+    if (match) url = match[0];
+  }
+  if (!url) return;
+
+  // Wait until app is fully loaded then pre-fill
+  function prefill() {
+    const urlInput   = document.getElementById('linkUrl');
+    const titleInput = document.getElementById('linkTitle');
+    if (!urlInput) { setTimeout(prefill, 300); return; }
+
+    switchTab('links');
+    urlInput.value   = url;
+    titleInput.value = sharedTitle || '';
+
+    // Highlight the form so user sees it
+    urlInput.focus();
+    urlInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Clean the URL so refresh doesn't re-trigger
+    const clean = window.location.pathname;
+    window.history.replaceState({}, '', clean);
+  }
+  prefill();
+}
+
+// Called after sign-in completes (app is ready)
+const _origScheduleAll = scheduleAll;
+function scheduleAll() {
+  _origScheduleAll();
+  handleShareTarget();
+}
+
 ['editOverlay','editObsOverlay','editGoalOverlay','editSubgoalOverlay'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById(id).classList.remove('open');});
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeEditModal();closeObsModal();closeGoalModal();closeSubgoalModal();dismissAlarm();}

@@ -396,10 +396,9 @@ select.ll-select:focus{border-color:var(--accent)}
         <span style="font-size:1.2rem">𝕏</span> Import X / Twitter Bookmarks
       </h3>
       <p style="font-size:.72rem;color:var(--muted);line-height:1.7;margin-bottom:14px">
-        Uses the X API v2 Bookmarks endpoint. You need a <strong>Bearer Token</strong> (app-only) and
-        your numeric <strong>User ID</strong>. Both are available from the
+        Uses the X API v2 Bookmarks endpoint. You need a <strong>Bearer Token</strong> from the
         <a href="https://developer.twitter.com/en/portal/dashboard" target="_blank" rel="noopener"
-           style="color:var(--sub)">X Developer Portal</a>.
+           style="color:var(--sub)">X Developer Portal</a>. Enter your @username and the app resolves your ID automatically.
       </p>
 
       <!-- Step 1 – credentials -->
@@ -412,12 +411,10 @@ select.ll-select:focus{border-color:var(--accent)}
           <button class="btn btn-ghost btn-sm" onclick="xTogglePw()"
                   title="Show/hide token">👁</button>
         </div>
-        <span class="modal-label">Your numeric User ID
-          <a href="https://tweeterid.com" target="_blank" rel="noopener"
-             style="color:var(--sub);font-size:.58rem;margin-left:4px">(look up ↗)</a>
-        </span>
+        <span class="modal-label">Your @username</span>
         <div class="form-row" style="margin-bottom:14px">
-          <input type="text" id="xUserId" placeholder="123456789" style="flex:1;min-width:140px;font-size:.73rem" />
+          <input type="text" id="xUsername" placeholder="@yourhandle"
+                 style="flex:1;min-width:140px;font-size:.73rem" />
         </div>
 
         <!-- CORS notice -->
@@ -1505,8 +1502,8 @@ let xRawBookmarks = []; // [{id, text, author_id, author_username, created_at, u
 // ── Credential helpers ──────────────────────
 function xGetCreds(){
   return {
-    token: document.getElementById('xBearerToken').value.trim(),
-    uid:   document.getElementById('xUserId').value.trim()
+    token:    document.getElementById('xBearerToken').value.trim(),
+    username: document.getElementById('xUsername').value.trim().replace(/^@/,'')
   };
 }
 function xTogglePw(){
@@ -1514,16 +1511,16 @@ function xTogglePw(){
   inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 function xRememberCreds(){
-  const {token, uid} = xGetCreds();
-  if(!token || !uid){ xStatus('xFetchStatus','Enter both fields first.','err'); return; }
+  const {token, username} = xGetCreds();
+  if(!token || !username){ xStatus('xFetchStatus','Enter both fields first.','err'); return; }
   sessionStorage.setItem('ll_xtoken', token);
-  sessionStorage.setItem('ll_xuid', uid);
+  sessionStorage.setItem('ll_xusername', username);
   xStatus('xFetchStatus','Saved for this session.','ok');
 }
 function xLoadSavedCreds(){
-  const t=sessionStorage.getItem('ll_xtoken'), u=sessionStorage.getItem('ll_xuid');
+  const t=sessionStorage.getItem('ll_xtoken'), u=sessionStorage.getItem('ll_xusername');
   if(t) document.getElementById('xBearerToken').value=t;
-  if(u) document.getElementById('xUserId').value=u;
+  if(u) document.getElementById('xUsername').value=u;
 }
 
 // ── Paste JSON tab ───────────────────────────
@@ -1544,14 +1541,38 @@ function xStatus(elId, msg, type){
   el.style.color = type==='err' ? 'var(--accent)' : type==='ok' ? 'var(--accent2)' : 'var(--muted)';
 }
 
+// ── Resolve @username → numeric ID ──────────
+async function xResolveUserId(token, username){
+  const PROXY = 'https://corsproxy.io/?';
+  const apiUrl = `https://api.twitter.com/2/users/by/username/${encodeURIComponent(username)}`;
+  const res = await fetch(PROXY + encodeURIComponent(apiUrl), {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  const json = await res.json();
+  if(!res.ok || !json.data?.id){
+    const msg = json.detail || json.title || json.errors?.[0]?.message || `HTTP ${res.status}`;
+    throw new Error('Could not resolve @' + username + ': ' + msg);
+  }
+  return json.data.id;
+}
+
 // ── Fetch via CORS proxy ─────────────────────
 async function xFetchBookmarks(){
-  const {token, uid} = xGetCreds();
+  const {token, username} = xGetCreds();
   if(!token){ xStatus('xFetchStatus','Enter your Bearer Token.','err'); return; }
-  if(!uid || !/^\d+$/.test(uid)){ xStatus('xFetchStatus','Enter a valid numeric User ID.','err'); return; }
+  if(!username){ xStatus('xFetchStatus','Enter your @username.','err'); return; }
 
-  xStatus('xFetchStatus','Fetching…','');
+  xStatus('xFetchStatus','Resolving @' + username + '…','');
   xRawBookmarks = [];
+
+  let uid;
+  try {
+    uid = await xResolveUserId(token, username);
+    xStatus('xFetchStatus','Found user ID ' + uid + '. Fetching bookmarks…','');
+  } catch(e) {
+    xStatus('xFetchStatus', e.message, 'err');
+    return;
+  }
 
   const PROXY = 'https://corsproxy.io/?';
   const fields = 'tweet.fields=created_at,author_id,text,entities&expansions=author_id&user.fields=username,name&max_results=100';
@@ -1573,10 +1594,9 @@ async function xFetchBookmarks(){
 
       if (!res.ok) {
         const errText = await res.text();
-        // Try to parse X error
         let friendly = `HTTP ${res.status}`;
         try { const j=JSON.parse(errText); friendly = j.detail || j.title || friendly; } catch{}
-        if(res.status === 403) friendly = '403 Forbidden — your app may not have Bookmarks read permission (needs OAuth 2.0 + "Read and write and Direct message" access, or a project with Bookmarks scope).';
+        if(res.status === 403) friendly = '403 Forbidden — your app needs Bookmarks read permission (OAuth 2.0 with "Read" access level).';
         if(res.status === 401) friendly = '401 Unauthorized — check your Bearer Token.';
         xStatus('xFetchStatus', friendly, 'err');
         return;
@@ -1586,9 +1606,9 @@ async function xFetchBookmarks(){
       xProcessApiResponse(json);
       nextToken = json.meta?.next_token || null;
 
-    } while (nextToken && page < 10); // cap at 10 pages (1000 tweets)
+    } while (nextToken && page < 10);
 
-    xStatus('xFetchStatus', `Fetched ${xRawBookmarks.length} bookmarks.`, 'ok');
+    xStatus('xFetchStatus', `✓ Fetched ${xRawBookmarks.length} bookmarks.`, 'ok');
     xShowPreview();
   } catch(e) {
     xStatus('xFetchStatus',

@@ -646,13 +646,13 @@ function waitForGSI(attempt){
   attempt = attempt || 0;
   if(typeof google !== 'undefined' && google.accounts && google.accounts.oauth2){
     initTokenClient();
-    // Enable sign-in button once library is ready
     const btn = document.getElementById('gSignInBtn');
     if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
+    // Attempt silent sign-in if user was previously logged in
+    trySilentSignIn();
   } else if(attempt < 40){
     setTimeout(()=>waitForGSI(attempt+1), 250);
   } else {
-    // GSI failed to load (offline, blocked, etc.)
     const errEl = document.getElementById('signInError');
     if(errEl){
       errEl.textContent = 'Google sign-in library failed to load. Check your internet connection and that accounts.google.com is not blocked.';
@@ -708,7 +708,6 @@ async function handleToken(tokenResponse){
   accessToken = tokenResponse.access_token;
 
   // Verify that drive.appdata scope was actually granted
-  // Google returns granted scopes in the token response
   const grantedScopes = (tokenResponse.scope || '').split(' ');
   const hasDriveScope = grantedScopes.some(s =>
     s.includes('drive.appdata') || s.includes('drive')
@@ -728,9 +727,15 @@ async function handleToken(tokenResponse){
       {headers:{'Authorization':'Bearer '+accessToken}}).then(r=>r.json());
     userEmail = info.email || '';
     document.getElementById('syncUser').textContent = userEmail;
+    // Save email so we can attempt silent refresh next time
+    localStorage.setItem('ll_user_email', userEmail);
+    localStorage.setItem('ll_signed_in', '1');
   }catch(e){ userEmail = ''; }
 
-  // Show app
+  showApp();
+}
+
+async function showApp(){
   document.getElementById('signInScreen').style.display = 'none';
   document.getElementById('appContainer').style.display = 'block';
   setDate();
@@ -755,8 +760,7 @@ async function handleToken(tokenResponse){
   }
 
   // Auto-refresh token before it expires (tokens last ~1 hour)
-  const expiresIn = (tokenResponse.expires_in || 3600) - 120; // refresh 2 min early
-  setTimeout(refreshToken, expiresIn * 1000);
+  setTimeout(refreshToken, (3600 - 120) * 1000);
 }
 
 function refreshToken(){
@@ -764,10 +768,20 @@ function refreshToken(){
   tokenClient.requestAccessToken({ prompt: '' }); // silent refresh
 }
 
+// ── Silent sign-in on load if previously signed in ──
+function trySilentSignIn(){
+  if(!localStorage.getItem('ll_signed_in')) return; // never signed in
+  if(!tokenClient) { setTimeout(trySilentSignIn, 300); return; }
+  // Request token silently (no prompt) — will call handleToken if successful
+  tokenClient.requestAccessToken({ prompt: '' });
+}
+
 function signOut(){
   if(accessToken) google.accounts.oauth2.revoke(accessToken, ()=>{});
   accessToken = null; driveFileId = null; userEmail = '';
   links = []; goals = [];
+  localStorage.removeItem('ll_signed_in');
+  localStorage.removeItem('ll_user_email');
   document.getElementById('appContainer').style.display = 'none';
   document.getElementById('signInScreen').style.display = 'flex';
   document.getElementById('syncUser').textContent = '';
@@ -1216,7 +1230,7 @@ function linkCardHTML(l){
     </div>
     <div class="link-card-actions">
       <button class="icon-btn" style="${lObs.length?'color:var(--accent2)':''}" onclick="toggleSec('obs-${l.id}')">✎${lObs.length||''}</button>
-      <button class="icon-btn" onclick="openEditLink('${l.id}')">⊘</button>
+      <button class="icon-btn" title="Edit / assign to goal" onclick="openEditLink('${l.id}')" style="color:var(--sub);font-size:.68rem;border:1px solid var(--line);border-radius:2px;padding:3px 6px">⊙ Goal</button>
       <button class="icon-btn del" onclick="deleteLink('${l.id}')">✕</button>
     </div>
   </div>

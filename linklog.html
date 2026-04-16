@@ -1751,6 +1751,7 @@ function xDoImport(){
 
 // (xLoadSavedCreds is called via switchTab above)
 
+['editOverlay','editObsOverlay','editGoalOverlay','editSubgoalOverlay'].forEach(id=>{
   document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById(id).classList.remove('open');});
 });
 document.addEventListener('keydown',e=>{

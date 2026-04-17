@@ -11,9 +11,9 @@
 <!-- Google Identity Services -->
 <meta name="google-signin-client_id" content="762017486457-pr5c61sv7mrvdq3mbudt1uvkkk0l07um.apps.googleusercontent.com">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<title>IndiaStock Analyser v4</title>
+<title>IndiaStock Analyser</title>
 <script>
-const md={name:"IndiaStock Analyser",short_name:"ISA v4",start_url:"./isav4-pwa.html",display:"standalone",background_color:"#0a0e1a",theme_color:"#0a0e1a",orientation:"portrait",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='24' fill='%230a0e1a'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-size='110' font-family='Arial'%3E%F0%9F%93%8A%3C/text%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml"}]};
+const md={name:"IndiaStock Analyser",short_name:"IndiaStock",start_url:"./isa-pwa.html",display:"standalone",background_color:"#0a0e1a",theme_color:"#0a0e1a",orientation:"portrait",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='24' fill='%230a0e1a'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-size='110' font-family='Arial'%3E%F0%9F%93%8A%3C/text%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml"}]};
 const ml=document.createElement("link");ml.rel="manifest";ml.href=URL.createObjectURL(new Blob([JSON.stringify(md)],{type:"application/json"}));document.head.appendChild(ml);
 </script>
 <style>
@@ -36,7 +36,7 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-s
 #hdr{background:linear-gradient(135deg,#0d1929,#0a0e1a);border-bottom:1px solid #1e2d45;padding:13px 13px 11px;flex-shrink:0}
 #tabs{display:flex;border-bottom:1px solid #1e2d45;background:#111827;flex-shrink:0}
 #content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:30px}
-.tb{flex:1;padding:14px 4px;background:none;border:none;border-bottom:3px solid transparent;color:#64748b;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:0.2px}
+.tb{flex:1;padding:11px 0;background:none;border:none;border-bottom:2px solid transparent;color:#64748b;font-weight:700;font-size:12px;cursor:pointer}
 .tb.active{color:#00d4aa;border-bottom-color:#00d4aa}
 .card{background:#161d2e;border:1px solid #1e2d45;border-radius:11px;padding:14px 13px;margin-bottom:11px}
 .st{color:#00d4aa;font-size:10px;font-weight:700;letter-spacing:2px;margin-bottom:11px;font-family:monospace;text-transform:uppercase}
@@ -114,7 +114,7 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-s
         <span style="color:#64748b;font-size:16px;font-weight:300">Analyser</span>
       </div>
       <div style="display:flex;align-items:center;gap:7px">
-        <span id="keyStatusBadge" style="display:flex;align-items:center;gap:4px;font-size:11px;color:#22c55e"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>Key set</span>
+        <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:#22c55e"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>Key set</span>
         <button onclick="resetKey()" style="font-size:11px;color:#64748b;background:none;border:none;cursor:pointer;text-decoration:underline">Change</button>
       </div>
     </div>
@@ -137,14 +137,10 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-s
     </div>
   </div>
 
-  <div id="tabs" style="display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:2px;padding:0 4px">
-    <button class="tb active" id="tab-analyse" onclick="switchTab('analyse')" style="white-space:nowrap;flex-shrink:0;padding:14px 10px">📊 Analyse</button>
-    <button class="tb" id="tab-history" onclick="switchTab('history')" style="white-space:nowrap;flex-shrink:0;padding:14px 10px">🗂 History (<span id="histCount">0</span>)</button>
-    <button class="tb" id="tab-watchlist" onclick="switchTab('watchlist')" style="white-space:nowrap;flex-shrink:0;padding:14px 10px">⭐ Watchlist (<span id="watchCount">0</span>)</button>
-    <button class="tb" id="tab-portfolio" onclick="switchTab('portfolio')" style="white-space:nowrap;flex-shrink:0;padding:14px 10px">💼 Portfolio</button>
-    <button class="tb" id="tab-trends" onclick="switchTab('trends')" style="white-space:nowrap;flex-shrink:0;padding:14px 10px">📈 Trends</button>
-    <button class="tb" id="tab-gtt" onclick="switchTab('gtt')" style="white-space:nowrap;flex-shrink:0;padding:14px 10px">🎯 GTT</button>
-    <button class="tb" id="tab-settings" onclick="switchTab('settings')" style="white-space:nowrap;flex-shrink:0;padding:14px 10px">⚙ Settings</button>
+  <div id="tabs">
+    <button class="tb active" id="tab-analyse" onclick="switchTab('analyse')">📊 Analysis</button>
+    <button class="tb" id="tab-history" onclick="switchTab('history')">🗂 History (<span id="histCount">0</span>)</button>
+    <button class="tb" id="tab-settings" onclick="switchTab('settings')">⚙ Settings</button>
   </div>
 
   <div id="content">
@@ -167,66 +163,17 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-s
         <input id="histSearch" class="inp" placeholder="🔍 Search history…" oninput="renderHistory()" autocomplete="off" style="width:100%"/>
       </div>
       <div style="display:flex;gap:6px;margin-bottom:8px">
-        <select id="histFilter" onchange="renderHistory()" style="flex:1;background:#111827;border:1px solid #1e2d45;border-radius:8px;padding:8px 8px;color:#e2e8f0;font-size:12px;outline:none">
-          <option value="all">📋 All Stocks</option>
-          <option value="portfolio">💼 Portfolio Only</option>
-          <option value="watchlist">⭐ Watchlist Only</option>
-        </select>
-        <select id="histSort" onchange="renderHistory()" style="flex:1;background:#111827;border:1px solid #1e2d45;border-radius:8px;padding:8px 8px;color:#e2e8f0;font-size:12px;outline:none">
-          <option value="newest">🕐 Newest</option>
-          <option value="oldest">🕐 Oldest</option>
-          <option value="score_desc">📈 Score ↓</option>
-          <option value="score_asc">📉 Score ↑</option>
+        <select id="histSort" onchange="renderHistory()" style="flex:1;background:#111827;border:1px solid #1e2d45;border-radius:8px;padding:8px 10px;color:#e2e8f0;font-size:12px;outline:none">
+          <option value="newest">🕐 Newest First</option>
+          <option value="oldest">🕐 Oldest First</option>
+          <option value="score_desc">⭐ Score: High→Low</option>
+          <option value="score_asc">⭐ Score: Low→High</option>
           <option value="rating">🏆 Rating</option>
         </select>
-      </div>
-      <div style="display:flex;gap:6px;margin-bottom:11px">
-        <button onclick="exportHistory()" style="flex:1;background:#38bdf818;color:#38bdf8;border:1px solid #38bdf844;border-radius:8px;padding:8px;font-size:11px;font-weight:700;cursor:pointer">📤 Export</button>
-        <label style="flex:1;background:#22c55e18;color:#22c55e;border:1px solid #22c55e44;border-radius:8px;padding:8px;font-size:11px;font-weight:700;cursor:pointer;text-align:center">📥 Import<input type="file" accept=".json" onchange="importHistory(event)" style="display:none"/></label>
+        <button onclick="exportHistory()" style="background:#38bdf818;color:#38bdf8;border:1px solid #38bdf844;border-radius:8px;padding:8px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">📤 Export</button>
+        <label style="background:#22c55e18;color:#22c55e;border:1px solid #22c55e44;border-radius:8px;padding:8px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">📥 Import<input type="file" accept=".json" onchange="importHistory(event)" style="display:none"/></label>
       </div>
       <div id="historyList"></div>
-    </div>
-
-    <div id="view-gtt" style="display:none;padding:13px">
-      <div style="display:flex;gap:7px;margin-bottom:11px;align-items:center">
-        <div style="flex:1;color:#94a3b8;font-size:12px;font-weight:700">GTT Orders from Upstox</div>
-        <button onclick="loadGTTOrders()" style="background:#00d4aa18;color:#00d4aa;border:1px solid #00d4aa44;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer">🔄 Refresh</button>
-      </div>
-      <div id="gttStatus" style="font-size:12px;color:#64748b;text-align:center;margin-bottom:10px;min-height:16px"></div>
-      <div id="gttList"></div>
-    </div>
-
-    <div id="view-trends" style="display:none;padding:13px">
-      <div style="color:#64748b;font-size:11px;margin-bottom:12px;line-height:1.5">Rating trend across last 4 analyses per stock. Refresh any stock to add latest quarter.</div>
-      <div id="trendsList"></div>
-    </div>
-
-    <div id="view-watchlist" style="display:none;padding:13px">
-      <div style="display:flex;gap:7px;margin-bottom:11px;align-items:center">
-        <div style="flex:1;color:#94a3b8;font-size:12px">Stocks you want to track. Add from History tab.</div>
-        <button onclick="clearWatchlist()" style="background:#ef444418;color:#ef4444;border:1px solid #ef444433;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer">Clear All</button>
-      </div>
-      <div id="watchlistList"></div>
-    </div>
-
-    <div id="view-portfolio" style="display:none;padding:13px">
-      <div style="display:flex;gap:7px;margin-bottom:11px;align-items:center">
-        <button onclick="loadPortfolio()" class="abtn ag" style="flex:1;padding:10px">🔄 Load Portfolio</button>
-      </div>
-      <div id="portfolioStatus" style="font-size:12px;color:#64748b;text-align:center;margin-bottom:10px;min-height:16px"></div>
-      <div id="portfolioList"></div>
-      <div class="card" style="margin-top:11px;display:none" id="portfolioLoginCard">
-        <div class="st">🔐 Upstox Login Required</div>
-        <div style="color:#64748b;font-size:12px;margin-bottom:12px;line-height:1.6">Portfolio requires your Upstox account login. Uses Algo OAuth token (daily).</div>
-        <button onclick="upstoxOAuthLogin()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border:none;border-radius:8px;padding:11px;font-weight:700;font-size:13px;width:100%;cursor:pointer;margin-bottom:8px">🔗 Login with Upstox</button>
-        <div style="text-align:center;margin-top:5px">
-          <button onclick="document.getElementById('manualTokenWrap').style.display='block'" style="background:none;border:none;color:#64748b;font-size:11px;cursor:pointer;text-decoration:underline">Paste access token manually</button>
-        </div>
-        <div id="manualTokenWrap" style="display:none;margin-top:10px">
-          <input id="manualAlgoToken" class="inp" type="password" placeholder="Upstox access token…" style="margin-bottom:8px"/>
-          <button onclick="saveManualToken()" style="background:#00d4aa;color:#000;border:none;border-radius:7px;padding:10px;font-weight:700;font-size:12px;width:100%;cursor:pointer">Save Token</button>
-        </div>
-      </div>
     </div>
 
     <div id="view-settings" style="display:none;padding:14px">
@@ -258,20 +205,6 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-s
           <button onclick="loginGoogleDrive()" style="background:#4285f418;color:#4285f4;border:1px solid #4285f444;border-radius:8px;padding:10px;font-weight:700;font-size:13px;width:100%;cursor:pointer;margin-bottom:8px">🔗 Login with Google</button>
           <button onclick="backupToGist()" style="background:#22c55e18;color:#22c55e;border:1px solid #22c55e44;border-radius:8px;padding:10px;font-weight:700;font-size:12px;width:100%;cursor:pointer">☁ Backup Now</button>
         </div>
-        <div style="margin-top:14px;border-top:1px solid #1e2d45;padding-top:13px">
-          <div style="color:#94a3b8;font-size:11px;margin-bottom:8px;font-weight:700">UPSTOX PORTFOLIO (ALGO API)</div>
-          <div style="color:#64748b;font-size:11px;margin-bottom:10px;line-height:1.6">
-            1. Go to <a href="https://account.upstox.com/developer/apps" target="_blank" style="color:#00d4aa">account.upstox.com/developer</a> → Create App<br/>
-            2. Set Redirect URL to exactly:<br/>
-            <span style="font-family:monospace;font-size:10px;color:#f59e0b;word-break:break-all">https://tbwrsx-cloud.github.io/isa/isav4-pwa.html</span><br/>
-            3. Paste your API Key &amp; Secret below and save
-          </div>
-          <input id="algoKeyInput" class="inp" type="password" placeholder="Upstox API Key…" autocomplete="off" style="margin-bottom:8px"/>
-          <input id="algoSecInput" class="inp" type="password" placeholder="Upstox API Secret…" autocomplete="off" style="margin-bottom:8px"/>
-          <button onclick="saveAlgoCredentials()" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:700;font-size:13px;width:100%;cursor:pointer;margin-bottom:8px">💾 Save Credentials</button>
-          <div id="algoSavedMsg" style="font-size:11px;text-align:center;min-height:14px;margin-bottom:6px"></div>
-          <button onclick="switchTab('portfolio')" style="background:#7c3aed18;color:#a78bfa;border:1px solid #7c3aed44;border-radius:8px;padding:10px;font-weight:700;font-size:12px;width:100%;cursor:pointer">💼 Go to Portfolio →</button>
-        </div>
         <div style="margin-top:12px;border-top:1px solid #1e2d45;padding-top:12px">
           <div style="color:#94a3b8;font-size:11px;margin-bottom:8px;font-weight:700">HISTORY MIGRATION</div>
           <div style="color:#64748b;font-size:11px;margin-bottom:8px;line-height:1.5">If your old history did not load automatically, tap below to force migrate it.</div>
@@ -284,7 +217,7 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-s
       <div class="card">
         <div class="st">ℹ About</div>
         <div style="color:#64748b;font-size:12px;line-height:1.7">
-          <b style="color:#94a3b8">IndiaStock Analyser v4</b><br/>
+          <b style="color:#94a3b8">IndiaStock Analyser v3</b><br/>
           AI-powered fundamental + technical analysis for NSE/BSE stocks using Anthropic Claude with live web search.<br/><br/>
           All data stored locally. Not financial advice.
         </div>
@@ -292,44 +225,6 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-s
     </div>
   </div>
 </div>
-</div>
-
-<!-- GTT Order Sheet -->
-<div id="gttSheet" style="display:none;position:fixed;inset:0;background:#0a0e1acc;z-index:9999;align-items:flex-end;justify-content:center">
-  <div style="background:#111827;border-radius:16px 16px 0 0;padding:20px 16px 34px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div>
-        <div style="color:#00d4aa;font-size:10px;font-weight:700;letter-spacing:2px">PLACE GTT ORDER</div>
-        <div id="gttSheetTitle" style="font-weight:800;font-size:16px;margin-top:3px"></div>
-        <div id="gttSheetBadges" style="margin-top:4px"></div>
-      </div>
-      <button onclick="closeGTTSheet()" style="background:#1e2d45;border:none;border-radius:8px;width:34px;height:34px;color:#64748b;font-size:18px;cursor:pointer">✕</button>
-    </div>
-    <!-- Transaction type -->
-    <div style="margin-bottom:12px">
-      <div style="color:#64748b;font-size:11px;margin-bottom:6px;font-weight:700">TRANSACTION TYPE</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-        <button id="gttBuyBtn" onclick="setGTTTxn('BUY')" style="padding:11px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;border:2px solid #22c55e;background:#22c55e22;color:#22c55e">BUY</button>
-        <button id="gttSellBtn" onclick="setGTTTxn('SELL')" style="padding:11px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid #1e2d45;background:#111827;color:#64748b">SELL</button>
-      </div>
-    </div>
-    <!-- Inputs -->
-    <div style="margin-bottom:11px">
-      <label style="color:#64748b;font-size:11px;font-weight:700;display:block;margin-bottom:5px">QUANTITY</label>
-      <input id="gttQty" type="number" min="1" placeholder="Number of shares" class="inp" style="font-size:15px"/>
-    </div>
-    <div style="margin-bottom:11px">
-      <label style="color:#64748b;font-size:11px;font-weight:700;display:block;margin-bottom:5px">TRIGGER PRICE (₹) <span style="color:#94a3b8;font-weight:400">— GTT fires when price hits this</span></label>
-      <input id="gttTrigger" type="number" step="0.05" placeholder="e.g. 450.00" class="inp" style="font-size:15px"/>
-    </div>
-    <div style="margin-bottom:16px">
-      <label style="color:#64748b;font-size:11px;font-weight:700;display:block;margin-bottom:5px">LIMIT PRICE (₹) <span style="color:#94a3b8;font-weight:400">— order price when GTT fires (optional for market)</span></label>
-      <input id="gttLimit" type="number" step="0.05" placeholder="e.g. 452.00" class="inp" style="font-size:15px"/>
-    </div>
-    <div id="gttSheetError" style="color:#ef4444;font-size:12px;text-align:center;margin-bottom:10px;min-height:16px"></div>
-    <button id="gttSubmitBtn" onclick="submitGTT()" style="background:#00d4aa;color:#000;border:none;border-radius:9px;padding:14px;font-weight:800;font-size:14px;width:100%;cursor:pointer">Place GTT Order →</button>
-    <div style="color:#64748b;font-size:10px;text-align:center;margin-top:10px">Delivery (CNC) · Single trigger · Upstox GTT v3 API</div>
-  </div>
 </div>
 
 <script>
@@ -344,13 +239,10 @@ TECHNICAL (max 30): Above200DMA+8, Above50DMA+5, RSI40-65+7 or 30-40/65-70+4, MA
 COMMENTARY (max 15, min -15): GuidanceRaised+5 or maintained+2 or cut-8, StrongOrderBook+4, MarginExpansion+4, DebtReduction+3, MgmtChange-5, RegulatoryIssue-6, AuditorConcern-8, PromoterPledge-6
 IMPORTANT: revenueGuidance/marginGuidance/demandOutlook/majorEvent fields inside fundamental{} are REQUIRED. Use exact allowed values.
 
-fitScore = (fundamentalScore/70)*60 + (technicalScore/30)*20 + (clamp(commentaryScore,-15,15)/15)*20, round and clamp 0-100
+fitScore = fundamentalScore + technicalScore + commentaryScore (clamp 0-100)
 Rating: >=75 Strong Buy, >=55 Buy, >=35 Hold, else Avoid. PAT<=5% forces Avoid.
 
-Return JSON fields: company, ticker, exchange, sector, currentPrice, marketCap, mcapToSales, peRatio, fundamental{publicHolding, promoterHolding, promoterHoldingChange, fiiHoldingChange, cfOperations, cfoPositive, cfoVsOthers(string), debtToReserve,
-revenueQoQ[4]: MUST be QoQ revenue GROWTH PERCENTAGE values like [-3.2, 5.1, 8.4, 2.1] NOT absolute revenue figures. Calculate as ((thisQ-prevQ)/prevQ)*100 rounded to 1 decimal,
-revenueQoQLabels[4]: quarter labels like ["Q1FY25","Q2FY25","Q3FY25","Q4FY25"] oldest to newest,
-patMargin, revenueGrowthYOY[2]: YoY revenue growth % for last 2 years, revenueGrowthYOYLabels[2], patGrowthYOY[2]: YoY PAT growth % for last 2 years, patGrowthYOYLabels[2], managementCommentary, revenueGuidance, marginGuidance, demandOutlook, majorEvent}, technical{trend, rsi, macdSignal, support1, support2, resistance1, resistance2, entryZone, stopLoss, target1, target2, potentialReturn, riskReward, timeframe, movingAvg50, movingAvg200, above50DMA, above200DMA, technicalSummary}, scoring{fundamentalScore, technicalScore, commentaryScore,
+Return JSON fields: company, ticker, exchange, sector, currentPrice, marketCap, mcapToSales, peRatio, fundamental{publicHolding, promoterHolding, promoterHoldingChange, fiiHoldingChange, cfOperations, cfoPositive, cfoVsOthers(string), debtToReserve, revenueQoQ[4], revenueQoQLabels[4], patMargin, revenueGrowthYOY[2], revenueGrowthYOYLabels[2], patGrowthYOY[2], patGrowthYOYLabels[2], managementCommentary, revenueGuidance, marginGuidance, demandOutlook, majorEvent}, technical{trend, rsi, macdSignal, support1, support2, resistance1, resistance2, entryZone, stopLoss, target1, target2, potentialReturn, riskReward, timeframe, movingAvg50, movingAvg200, above50DMA, above200DMA, technicalSummary}, scoring{fundamentalScore, technicalScore, commentaryScore,
 fundamentalBreakdown[]: short chips like "Promoter>50%: +8" — max 25 chars each,
 technicalBreakdown[]: short chips like "Above200DMA: +8" — max 25 chars each,
 commentaryBreakdown[]: MUST use exact format "Label: +N" or "Label: -N" — max 30 chars, no sentences, no camelCase. Examples: "GuidanceRaised: +5", "PromoterPledge: -6", "MarginExpanding: +4", "MgmtChange: -5"}, fitScore, fitRating, fitSummary, redFlags[], positives[], dataNote`;
@@ -360,7 +252,7 @@ let currentData=null,stepIv=null;
 
 // ── Key management ────────────────────────────────────────────────────────────
 const getKey=()=>localStorage.getItem("isa_k")||"";
-const setKey=k=>localStorage.setItem("isa_k",k.trim().replace(/[\n\r\t]/g,""));
+const setKey=k=>localStorage.setItem("isa_k",k.trim());
 function saveKey(){
   const k=document.getElementById("apiKeyInput").value.trim();
   if(!k.startsWith("sk-ant-")){document.getElementById("setupErr").textContent="Invalid key — must start with sk-ant-";return;}
@@ -372,31 +264,12 @@ function updateKey(){
   if(!k.startsWith("sk-ant-")){m.style.color="#ef4444";m.textContent="Invalid key format.";return;}
   setKey(k);document.getElementById("settingsKey").value="";
   m.style.color="#22c55e";m.textContent="✓ Key updated!";
-  updateKeyBadge();
   setTimeout(()=>m.textContent="",3000);
 }
 function resetKey(){if(confirm("Change API key?")){document.getElementById("mainApp").style.display="none";document.getElementById("setupScreen").style.display="flex";document.getElementById("apiKeyInput").value="";}}
 function clearAll(){if(confirm("Clear all data including history and key?")){localStorage.clear();location.reload();}}
 function toggleEye(id,btnId){const i=document.getElementById(id);i.type=i.type==="password"?"text":"password";}
-function launchApp(){
-  document.getElementById("setupScreen").style.display="none";
-  document.getElementById("mainApp").style.display="flex";
-  updateHistCount();
-  updateKeyBadge();
-  updateWatchCount();
-}
-function updateKeyBadge(){
-  const el=document.getElementById("keyStatusBadge");
-  if(!el)return;
-  const k=getKey();
-  if(k){
-    el.style.color="#22c55e";
-    el.innerHTML='<span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>Key set';
-  } else {
-    el.style.color="#ef4444";
-    el.innerHTML='<span style="width:6px;height:6px;border-radius:50%;background:#ef4444;display:inline-block"></span>No API key!';
-  }
-}
+function launchApp(){document.getElementById("setupScreen").style.display="none";document.getElementById("mainApp").style.display="flex";updateHistCount();}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener("load",()=>{
@@ -406,26 +279,19 @@ window.addEventListener("load",()=>{
   waitForGSI();
   setTimeout(checkBackupReminder, 4000);
   document.getElementById("apiKeyInput").addEventListener("keydown",e=>{if(e.key==="Enter")saveKey();});
-  document.getElementById("scripInput").addEventListener("keydown",e=>{if(e.key==="Enter")analyze();});
   if("serviceWorker"in navigator){
-    const sw=`const V='v4.3';self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll([])).then(()=>self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>clients.claim()))});self.addEventListener('fetch',e=>{if(e.request.url.includes('anthropic.com')||e.request.url.includes('upstox.com'))return;});`;
+    const sw=`self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',()=>clients.claim());self.addEventListener('fetch',e=>{if(e.request.url.includes('anthropic.com'))return;e.respondWith(fetch(e.request).catch(()=>new Response('Offline')));});`;
     navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:"application/javascript"}))).catch(()=>{});
   }
 });
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(t){
-  ["analyse","history","portfolio","watchlist","trends","gtt","settings"].forEach(x=>{
-    const v=document.getElementById("view-"+x);
-    const b=document.getElementById("tab-"+x);
-    if(v)v.style.display=x===t?"block":"none";
-    if(b)b.classList.toggle("active",x===t);
+  ["analyse","history","settings"].forEach(x=>{
+    document.getElementById("view-"+x).style.display=x===t?"block":"none";
+    document.getElementById("tab-"+x).classList.toggle("active",x===t);
   });
   if(t==="history")renderHistory();
-  if(t==="portfolio")initPortfolioTab();
-  if(t==="watchlist")renderWatchlist();
-  if(t==="trends")renderTrends();
-  if(t==="gtt")loadGTTOrders();
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -450,49 +316,23 @@ const loadHist=()=>{
   }catch(_){return[];}
 };
 const saveHist=l=>{try{localStorage.setItem("isa_h",JSON.stringify(l));}catch(_){}};
-// ── Quarter label from current date ──────────────────────
-function currentQuarterLabel(){
-  const now=new Date();
-  const m=now.getMonth()+1; // 1-12
-  // Indian FY convention: FY26 = Apr 2025 - Mar 2026
-  // Apr 2026 belongs to FY27 (ending Mar 2027)
-  // User convention: use the year in which April falls (starting year)
-  // So Apr 2026 = Q1 FY26 (year 2026 is when this Q1 starts)
-  const yr=now.getFullYear();
-  const fyS=String(m>=4?yr:yr-1).slice(2); // Apr onwards = current year label
-  const q=m>=4&&m<=6?"Q1":m>=7&&m<=9?"Q2":m>=10&&m<=12?"Q3":"Q4";
-  return `${q} FY${fyS}`;
-}
-
 function addToHist(d){
+  // Validate ticker against NSE symbols before saving
   const ticker=(d.ticker||"").toUpperCase().trim();
-  if(!ticker||ticker.length<2){ console.warn("Invalid ticker",ticker); return; }
+  if(!ticker||ticker.length<2){console.warn("addToHist: invalid ticker",ticker);return;}
+  // Check against local NSE DB if loaded
   if(window._nseDB&&window._nseDB.length){
     const found=window._nseDB.find(s=>s[0]===ticker);
-    if(!found){ console.warn("Ticker not in NSE DB:",ticker); d.dataNote=(d.dataNote||"")+" ⚠ Ticker not verified on NSE."; }
+    if(!found){
+      // Not in NSE list — warn but still save with a flag
+      console.warn("Ticker not in NSE DB:",ticker);
+      d.dataNote=(d.dataNote||"")+" ⚠ Ticker not verified in NSE symbols list.";
+    }
   }
   const l=loadHist();
-  const existing=l.find(x=>x.ticker===d.ticker);
-  // Preserve ratingHistory from existing entry, add new snapshot
-  const prevHistory=(existing?.fullData?.ratingHistory||existing?.ratingHistory||[]);
-  const qLabel=currentQuarterLabel();
-  // Only add snapshot if quarter changed or first entry
-  const lastSnap=prevHistory[prevHistory.length-1];
-  const newSnap={quarter:qLabel,score:d.fitScore,rating:d.fitRating,price:d.currentPrice,savedAt:new Date().toISOString()};
-  let ratingHistory;
-  if(lastSnap&&lastSnap.quarter===qLabel){
-    // Same quarter — update existing snapshot
-    ratingHistory=[...prevHistory.slice(0,-1),newSnap];
-  } else {
-    // New quarter — append and keep last 4
-    ratingHistory=[...prevHistory,newSnap].slice(-4);
-  }
-  d.ratingHistory=ratingHistory;
   const e={ticker:d.ticker,company:d.company,fitScore:d.fitScore,fitRating:d.fitRating,
     currentPrice:d.currentPrice,peRatio:d.peRatio,
-    savedAt:new Date().toLocaleString("en-IN"),
-    ratingHistory:ratingHistory,
-    fullData:d};
+    savedAt:new Date().toLocaleString("en-IN"),fullData:d};
   saveHist([e,...l.filter(x=>x.ticker!==d.ticker)].slice(0,100));
   updateHistCount();
   // Auto-backup to Google Drive
@@ -518,19 +358,13 @@ async function analyze(){
   if(!q)return;
   const key=getKey();
   if(!key){alert("No API key. Go to Settings.");return;}
-  // Validate key format before calling API
-  const cleanKey=key.trim().replace(/[\n\r\t]/g,"");
-  if(!cleanKey.startsWith("sk-ant-")){
-    alert("API key looks invalid: starts with \""+cleanKey.slice(0,10)+"...\". Go to Settings and re-enter your key.");
-    return;
-  }
   showLoading();
   let si=0;document.getElementById("progressTxt").textContent=STEPS[0];
   stepIv=setInterval(()=>{si=(si+1)%STEPS.length;document.getElementById("progressTxt").textContent=STEPS[si];},2200);
   try{
     const res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":cleanKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({
         model:"claude-haiku-4-5-20251001",
         max_tokens:3000,
@@ -613,9 +447,6 @@ function buildResult(d){
   <div class="g2" style="margin-top:11px">
     <button class="abtn ar" onclick="downloadReport()">📄 Download Report</button>
     <button class="abtn ah" onclick="switchTab('history')">🗂 History</button>
-  </div>
-  <div style="margin-top:8px">
-    <button onclick="refreshAnalysis()" style="background:#7c3aed18;color:#a78bfa;border:1px solid #7c3aed44;border-radius:8px;padding:9px;font-weight:700;font-size:12px;width:100%;cursor:pointer">🔄 Refresh Analysis (re-run with latest data)</button>
   </div>
 </div>
 
@@ -729,47 +560,28 @@ function renderHistory(){
   const rawList=loadHist();
   const el=document.getElementById("historyList");
   if(!rawList.length){el.innerHTML=`<div class="empty"><div style="font-size:34px;margin-bottom:10px">🗂</div><div style="font-size:13px">No saved analyses yet.</div><div style="font-size:11px;margin-top:3px">Every analysis saves automatically.</div></div>`;return;}
-  // Load portfolio symbols from localStorage so 💼 shows without visiting Portfolio tab
-  if(!window._portfolioSymbols){
-    try{const saved=localStorage.getItem("isa_portfolio_symbols");window._portfolioSymbols=saved?new Set(JSON.parse(saved)):new Set();}
-    catch(_){window._portfolioSymbols=new Set();}
-  }
-  const wl=loadWatchlist();
-  const wlSet=new Set(wl.map(w=>w.ticker));
-  // Filter
+  // Search filter
   const searchQ=(document.getElementById("histSearch")?.value||"").toLowerCase().trim();
-  const filter=document.getElementById("histFilter")?.value||"all";
   const sort=document.getElementById("histSort")?.value||"newest";
   const ratingOrder={"Strong Buy":4,"Buy":3,"Hold":2,"Avoid":1};
   let list=[...rawList.map((h,i)=>({...h,_orig:i}))];
-  if(searchQ) list=list.filter(h=>(h.ticker||"").toLowerCase().includes(searchQ)||(h.company||"").toLowerCase().includes(searchQ));
-  if(filter==="portfolio") list=list.filter(h=>window._portfolioSymbols.has(h.ticker?.toUpperCase()));
-  if(filter==="watchlist") list=list.filter(h=>wlSet.has(h.ticker));
+  // Apply text search
+  if(searchQ) list=list.filter(h=>
+    (h.ticker||"").toLowerCase().includes(searchQ)||
+    (h.company||"").toLowerCase().includes(searchQ)
+  );
   if(sort==="oldest") list.reverse();
   else if(sort==="score_desc") list.sort((a,b)=>(b.fitScore||0)-(a.fitScore||0));
   else if(sort==="score_asc") list.sort((a,b)=>(a.fitScore||0)-(b.fitScore||0));
   else if(sort==="rating") list.sort((a,b)=>(ratingOrder[b.fitRating]||0)-(ratingOrder[a.fitRating]||0));
-  const warn=rawList.length>=90?`<div style="background:#f59e0b18;border:1px solid #f59e0b44;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:11px;color:#f59e0b">⚠ ${rawList.length}/100 entries used.</div>`:"";
-  if(!list.length){
-    const emptyMsg=searchQ?`No results for "${searchQ}"`:
-      filter==="portfolio"?"No portfolio stocks in history yet — load Portfolio tab first":
-      filter==="watchlist"?"No watchlist stocks in history":
-      "No history yet";
-    const emptyIcon=searchQ?"🔍":filter==="portfolio"?"💼":"⭐";
-    el.innerHTML=warn+`<div class="empty"><div style="font-size:28px;margin-bottom:8px">${emptyIcon}</div><div style="font-size:12px;color:#64748b">${emptyMsg}</div></div>`;
-    return;
-  }
+  if(!list.length&&searchQ){el.innerHTML=`<div class="empty"><div style="font-size:28px;margin-bottom:8px">🔍</div><div style="font-size:12px;color:#64748b">No results for "${searchQ}"</div></div>`;return;}
+  const warn=rawList.length>=90?`<div style="background:#f59e0b18;border:1px solid #f59e0b44;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:11px;color:#f59e0b">⚠ ${rawList.length}/100 entries used. Oldest entries will be removed after 100.</div>`:"";
   el.innerHTML=warn+list.map((h)=>{
   const i=h._orig;
     const c=rc(h.fitRating);
-    const inPortfolio=window._portfolioSymbols&&window._portfolioSymbols.has(h.ticker?.toUpperCase());
-    const inWatchlist=wlSet.has(h.ticker);
     return`<div class="hi" onclick="loadHist2(${i})">
       <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
-          <span style="font-weight:700;font-size:14px">${h.company}</span>
-          ${inPortfolio?'<span style="font-size:12px" title="In portfolio">💼</span>':""}
-        </div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px">${h.company}</div>
         <div style="margin-bottom:3px">${bdg(h.ticker,"#38bdf8")}${bdg(h.fitRating,c)}</div>
         <div style="color:#64748b;font-size:10px">Rs.${h.currentPrice} · PE:${h.peRatio}x · ${h.savedAt}</div>
       </div>
@@ -777,11 +589,7 @@ function renderHistory(){
         <div style="font-size:24px;font-weight:800;font-family:monospace;color:${c};line-height:1">${h.fitScore}</div>
         <div style="color:#64748b;font-size:10px">/100</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:5px;align-items:center;min-width:36px">
-        <button onclick="event.stopPropagation();toggleWatchlist(${i})" style="background:${inWatchlist?'#f59e0b22':'#1e2d45'};border:1px solid ${inWatchlist?'#f59e0b55':'#2d3f55'};border-radius:6px;width:32px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">${inWatchlist?"⭐":"☆"}</button>
-        <button onclick="event.stopPropagation();refreshFromHist(${i})" style="background:#7c3aed15;border:1px solid #7c3aed33;border-radius:6px;width:32px;height:30px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#a78bfa" title="Refresh analysis">🔄</button>
-        <button onclick="event.stopPropagation();delHist(${i})" style="background:#ef444415;border:1px solid #ef444430;border-radius:6px;width:32px;height:30px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#ef4444">🗑</button>
-      </div>
+      <button onclick="event.stopPropagation();delHist(${i})" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;padding:4px 2px">🗑</button>
     </div>`;
   }).join("");
 }
@@ -863,18 +671,14 @@ function recalcScore(d){
   // Commentary score — use saved value or 0
   const cs=d.scoring?.commentaryScore||0;
   const cb=d.scoring?.commentaryBreakdown||[];
-  // Final — weighted: Fundamental 60%, Technical 20%, Commentary 20%
-  const fWt = Math.round((fs/70)*60);   // 0-60
-  const tWt = Math.round((ts/30)*20);   // 0-20
-  const cWt = Math.round((Math.min(Math.max(cs,-15),15)/15)*20); // -20 to +20
-  const total=Math.min(Math.max(fWt+tWt+cWt,0),100);
+  // Final
+  const total=Math.min(Math.max(fs+ts+cs,0),100);
   let rating="Avoid";
-  if(f.patMargin>0&&f.patMargin<=5)rating="Avoid";
+  if(f.patMargin<=5&&f.patMargin>0)rating="Avoid";
   else if(total>=75)rating="Strong Buy";
   else if(total>=55)rating="Buy";
   else if(total>=35)rating="Hold";
   d.scoring={fundamentalScore:fs,technicalScore:ts,commentaryScore:cs,
-    fundamentalWeighted:fWt,technicalWeighted:tWt,commentaryWeighted:cWt,
     fundamentalBreakdown:fb,technicalBreakdown:tb,commentaryBreakdown:cb};
   d.fitScore=total;
   d.fitRating=rating;
@@ -1032,364 +836,42 @@ function showStorageDebug(){
   msg.innerHTML=info.length?info.join("<br/>"):"LocalStorage is empty";
 }
 
-
-// ══════════════════════════════════════════════════════════
-// v4 ADDITIONS — Portfolio from Upstox
-// ══════════════════════════════════════════════════════════
-const UPSTOX_BASE = "https://api.upstox.com/v2";
-const REDIR_URL   = "https://tbwrsx-cloud.github.io/isa/isav4-pwa.html";
-
-// ── Upstox OAuth token (daily — for portfolio) ────────────
-const getAlgoKey  = () => localStorage.getItem("isa_algo_key")  || "";
-const getAlgoSec  = () => localStorage.getItem("isa_algo_sec")  || "";
-const getAlgoTok  = () => localStorage.getItem("isa_algo_token")|| "";
-const setAlgoTok  = t  => localStorage.setItem("isa_algo_token", t);
-
-// Portfolio tab handled in main switchTab
-
-// ── Handle OAuth callback on page load ───────────────────
-window.addEventListener("load", ()=>{
-  loadNSEDB();
-  initNSESearch();
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get("code");
-  if(code){
-    window.history.replaceState({}, "", window.location.pathname);
-    exchangeToken(code);
-  }
-});
-
-async function exchangeToken(code){
-  const key = getAlgoKey(), sec = getAlgoSec();
-  if(!key||!sec){ alert("Set Algo API key & secret in Settings first."); return; }
-  try{
-    const r = await fetch(`${UPSTOX_BASE}/login/authorization/token`,{
-      method:"POST",
-      headers:{"Content-Type":"application/x-www-form-urlencoded","Accept":"application/json"},
-      body: new URLSearchParams({code, client_id:key, client_secret:sec, redirect_uri:REDIR_URL, grant_type:"authorization_code"})
-    });
-    const d = await r.json();
-    if(d.access_token){
-      setAlgoTok(d.access_token);
-      showPortfolioStatus("✓ Logged in! Loading portfolio…", "#22c55e");
-      switchTab("portfolio");
-      loadPortfolio();
-    }
-  }catch(e){ console.error("Token exchange failed", e); }
-}
-
-function upstoxOAuthLogin(){
-  const key = getAlgoKey();
-  if(!key){ alert("Set Algo API key in Settings first."); return; }
-  window.location.href = `https://api.upstox.com/v2/login/authorization/dialog?response_type=code&client_id=${key}&redirect_uri=${encodeURIComponent(REDIR_URL)}`;
-}
-
-function saveManualToken(){
-  const t = document.getElementById("manualAlgoToken")?.value.trim();
-  if(!t) return;
-  setAlgoTok(t);
-  document.getElementById("portfolioLoginCard").style.display = "none";
-  showPortfolioStatus("✓ Token saved. Loading portfolio…", "#22c55e");
-  loadPortfolio();
-}
-
-function showPortfolioStatus(msg, color="#64748b"){
-  const el = document.getElementById("portfolioStatus");
-  if(el){ el.textContent = msg; el.style.color = color||"#64748b"; }
-}
-
-function initPortfolioTab(){
-  const tok = getAlgoTok();
-  const loginCard = document.getElementById("portfolioLoginCard");
-  if(!tok){
-    if(loginCard) loginCard.style.display = "block";
-    showPortfolioStatus("Login required to view portfolio", "#f59e0b");
-  } else {
-    if(loginCard) loginCard.style.display = "none";
-    const list = document.getElementById("portfolioList");
-    if(list && !list.innerHTML) loadPortfolio();
-  }
-}
-
-// ── Fetch holdings from Upstox ────────────────────────────
-async function loadPortfolio(){
-  const tok = getAlgoTok();
-  if(!tok){
-    document.getElementById("portfolioLoginCard").style.display = "block";
-    showPortfolioStatus("Please login to Upstox first", "#f59e0b");
-    return;
-  }
-  showPortfolioStatus("Loading holdings from Upstox…", "#64748b");
-  try{
-    const r = await fetch(`${UPSTOX_BASE}/portfolio/long-term-holdings`,{
-      headers:{"Authorization":`Bearer ${tok}`,"Accept":"application/json"}
-    });
-    if(r.status === 401){
-      setAlgoTok(""); // clear expired token
-      document.getElementById("portfolioLoginCard").style.display = "block";
-      showPortfolioStatus("Session expired. Please login again.", "#ef4444");
-      return;
-    }
-    if(!r.ok) throw new Error(`Holdings API error ${r.status}`);
-    const d = await r.json();
-    renderPortfolio(d.data||[]);
-  }catch(e){
-    showPortfolioStatus("Failed: "+e.message, "#ef4444");
-    console.error(e);
-  }
-}
-
-// ── Cross-reference holdings with history ─────────────────
-function renderPortfolio(holdings){
-  // Store symbols globally AND in localStorage so history shows 💼 even before portfolio tab is visited
-  const syms = holdings.map(h=>(h.trading_symbol||h.tradingsymbol||"").toUpperCase()).filter(Boolean);
-  window._portfolioSymbols = new Set(syms);
-  try{localStorage.setItem("isa_portfolio_symbols", JSON.stringify(syms));}catch(_){}
-  const el = document.getElementById("portfolioList");
-  if(!holdings.length){
-    el.innerHTML = `<div class="empty"><div style="font-size:34px;margin-bottom:10px">💼</div><div>No holdings found in your Upstox account.</div></div>`;
-    showPortfolioStatus("", "");
-    return;
-  }
-
-  const hist = loadHist();
-  // Build map of analysed tickers
-  const histMap = {};
-  hist.forEach(h => { histMap[h.ticker?.toUpperCase()] = h; });
-
-  // Sort: analysed holdings first, then by P&L
-  const sorted = [...holdings].sort((a,b)=>{
-    const aA = histMap[a.trading_symbol?.toUpperCase()];
-    const bA = histMap[b.trading_symbol?.toUpperCase()];
-    if(aA&&!bA) return -1;
-    if(!aA&&bA) return 1;
-    return (b.pnl||0)-(a.pnl||0);
-  });
-
-  const analysed = sorted.filter(h => histMap[h.trading_symbol?.toUpperCase()]);
-  const notAnalysed = sorted.filter(h => !histMap[h.trading_symbol?.toUpperCase()]);
-
-  showPortfolioStatus(`${holdings.length} holdings · ${analysed.length} analysed`, "#00d4aa");
-
-  let html = "";
-
-  if(analysed.length){
-    html += `<div style="color:#00d4aa;font-size:10px;font-weight:700;letter-spacing:2px;margin-bottom:8px">✓ ANALYSED (${analysed.length})</div>`;
-    html += analysed.map(h => portfolioCard(h, histMap[h.trading_symbol?.toUpperCase()])).join("");
-  }
-
-  if(notAnalysed.length){
-    html += `<div style="color:#64748b;font-size:10px;font-weight:700;letter-spacing:2px;margin:12px 0 8px">NOT YET ANALYSED (${notAnalysed.length})</div>`;
-    html += notAnalysed.map(h => portfolioCard(h, null)).join("");
-  }
-
-  el.innerHTML = html;
-}
-
-function portfolioCard(h, histEntry){
-  const sym    = h.trading_symbol || h.tradingsymbol || "--";
-  const name   = h.company_name || sym;
-  const qty    = h.quantity||0;
-  const avg    = h.average_price||0;
-  const ltp    = h.last_price||0;
-  const pnl    = h.pnl||0;
-  const pnlPct = avg>0?Math.round((ltp-avg)/avg*1000)/10:0;
-  const pnlCol = pnl>=0?"#22c55e":"#ef4444";
-  const dayChg = h.day_change_percentage||0;
-  const dayCol = dayChg>=0?"#22c55e":"#ef4444";
-  const invested = Math.round(avg*qty);
-  const current  = Math.round(ltp*qty);
-
-  // History entry details
-  let histBadge = "";
-  let histDetails = "";
-  if(histEntry){
-    const rc2 = r=>r?.includes("Strong Buy")?"#22c55e":r?.includes("Buy")?"#00d4aa":r?.includes("Hold")?"#f59e0b":"#ef4444";
-    const c = rc2(histEntry.fitRating);
-    histBadge = `<span style="background:${c}22;color:${c};border:1px solid ${c}44;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;margin-left:5px">${histEntry.fitRating} ${histEntry.fitScore}/100</span>`;
-    histDetails = `
-      <div style="background:#0a0e1a;border-radius:6px;padding:7px 9px;margin-top:7px;display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:11px;color:#64748b">Last analysed: ${histEntry.savedAt||"--"}</div>
-        <button onclick="loadHist2(${loadHist().findIndex(x=>x.ticker===histEntry.ticker)})" 
-          style="background:#00d4aa18;color:#00d4aa;border:1px solid #00d4aa33;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer">
-          View Analysis
-        </button>
-      </div>`;
-  } else {
-    histBadge = `<span style="background:#64748b22;color:#64748b;border:1px solid #64748b33;border-radius:4px;padding:2px 7px;font-size:10px">Not analysed</span>`;
-    histDetails = `
-      <div style="background:#0a0e1a;border-radius:6px;padding:7px 9px;margin-top:7px;text-align:center">
-        <button onclick="document.getElementById('scripInput').value='${sym}';switchTab('analyse');analyze()" 
-          style="background:#00d4aa;color:#000;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">
-          Analyse ${sym} →
-        </button>
-      </div>`;
-  }
-
-  return `<div class="card" style="margin-bottom:10px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-      <div style="flex:1">
-        <div style="font-weight:700;font-size:14px;margin-bottom:3px">${name}</div>
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
-          <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf844;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">${sym}</span>
-          ${histBadge}
-        </div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-family:monospace;font-weight:700;font-size:15px">Rs.${ltp}</div>
-        <div style="font-size:11px;color:${dayCol};font-family:monospace">${dayChg>=0?"+":""}${dayChg}% today</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px">
-      <div style="background:#111827;border-radius:6px;padding:6px;text-align:center">
-        <div style="color:#64748b;font-size:9px;margin-bottom:2px">QTY</div>
-        <div style="font-weight:700;font-family:monospace;font-size:12px">${qty}</div>
-      </div>
-      <div style="background:#111827;border-radius:6px;padding:6px;text-align:center">
-        <div style="color:#64748b;font-size:9px;margin-bottom:2px">AVG</div>
-        <div style="font-weight:700;font-family:monospace;font-size:12px">Rs.${Math.round(avg*10)/10}</div>
-      </div>
-      <div style="background:#111827;border-radius:6px;padding:6px;text-align:center">
-        <div style="color:#64748b;font-size:9px;margin-bottom:2px">INVESTED</div>
-        <div style="font-weight:700;font-family:monospace;font-size:11px">Rs.${invested>=100000?Math.round(invested/1000)+"K":invested}</div>
-      </div>
-      <div style="background:${pnl>=0?"#22c55e11":"#ef444411"};border-radius:6px;padding:6px;text-align:center;border:1px solid ${pnl>=0?"#22c55e33":"#ef444433"}">
-        <div style="color:#64748b;font-size:9px;margin-bottom:2px">P&L</div>
-        <div style="font-weight:700;font-family:monospace;font-size:11px;color:${pnlCol}">${pnl>=0?"+":""}${Math.round(pnl)}<div style="font-size:9px">${pnlPct>=0?"+":""}${pnlPct}%</div></div>
-      </div>
-    </div>
-    ${histDetails}
-  </div>`;
-}
-
-// ── Settings additions for Algo keys ─────────────────────
-function saveAlgoCredentials(){
-  const k = document.getElementById("algoKeyInput")?.value.trim();
-  const s = document.getElementById("algoSecInput")?.value.trim();
-  if(k) localStorage.setItem("isa_algo_key", k);
-  if(s) localStorage.setItem("isa_algo_sec", s);
-  if(k) document.getElementById("algoKeyInput").value="";
-  if(s) document.getElementById("algoSecInput").value="";
-  const m1=document.getElementById("settingsMsg");
-  const m2=document.getElementById("algoSavedMsg");
-  const msg = (k||s) ? "✓ Saved! Now go to Portfolio tab → Login with Upstox" : "Nothing to save";
-  const col = (k||s) ? "#22c55e" : "#f59e0b";
-  if(m1){m1.style.color=col;m1.textContent=msg;setTimeout(()=>m1.textContent="",4000);}
-  if(m2){m2.style.color=col;m2.textContent=msg;setTimeout(()=>m2.textContent="",4000);}
-}
-
-// ══════════════════════════════════════════════════════════
-// WATCHLIST
-// ══════════════════════════════════════════════════════════
-const loadWatchlist = () => {try{return JSON.parse(localStorage.getItem("isa_wl")||"[]");}catch(_){return[];}};
-const saveWatchlist = l => {try{localStorage.setItem("isa_wl",JSON.stringify(l));}catch(_){}};
-const isInWatchlist = ticker => loadWatchlist().some(w=>w.ticker===ticker);
-const updateWatchCount = () => {const el=document.getElementById("watchCount");if(el)el.textContent=loadWatchlist().length;};
-
-function toggleWatchlist(histIdx){
-  const l=loadHist();
-  const h=l[histIdx];if(!h)return;
-  let wl=loadWatchlist();
-  const exists=wl.findIndex(w=>w.ticker===h.ticker);
-  if(exists>=0){
-    wl.splice(exists,1);
-  } else {
-    wl.push({ticker:h.ticker,company:h.company,fitScore:h.fitScore,fitRating:h.fitRating,
-      currentPrice:h.currentPrice,peRatio:h.peRatio,savedAt:h.savedAt,fullData:h.fullData});
-  }
-  saveWatchlist(wl);
-  updateWatchCount();
-  renderHistory(); // refresh to update star
-}
-
-function clearWatchlist(){
-  if(confirm("Clear entire watchlist?"))return;
-  saveWatchlist([]);
-  updateWatchCount();
-  renderWatchlist();
-}
-
-function renderWatchlist(){
-  updateWatchCount();
-  const wl=loadWatchlist();
-  const el=document.getElementById("watchlistList");
-  if(!el)return;
-  if(!wl.length){
-    el.innerHTML=`<div class="empty"><div style="font-size:34px;margin-bottom:10px">⭐</div><div style="font-size:13px">No stocks in watchlist.</div><div style="font-size:11px;margin-top:4px">Tap ☆ on any history entry to add.</div></div>`;
-    return;
-  }
-  el.innerHTML=wl.map((h,i)=>{
-    const c=rc(h.fitRating);
-    const inPortfolio=window._portfolioSymbols&&window._portfolioSymbols.has(h.ticker?.toUpperCase());
-    return`<div class="card" style="margin-bottom:9px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px" onclick="loadWL(${i})" style="cursor:pointer">
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
-            <span style="font-weight:700;font-size:14px">${h.company}</span>
-            ${inPortfolio?'<span style="font-size:11px">💼</span>':""}
-          </div>
-          <div style="margin-bottom:3px">${bdg(h.ticker,"#38bdf8")}${bdg(h.fitRating,c)}</div>
-          <div style="color:#64748b;font-size:10px">Rs.${h.currentPrice} · Score:${h.fitScore}/100</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:5px;align-items:center">
-          <div style="text-align:center">
-            <div style="font-size:22px;font-weight:800;font-family:monospace;color:${c};line-height:1">${h.fitScore}</div>
-            <div style="color:#64748b;font-size:9px">/100</div>
-          </div>
-          <button onclick="event.stopPropagation();removeFromWatchlist('${h.ticker}')" style="background:#f59e0b18;border:1px solid #f59e0b33;border-radius:6px;width:32px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Remove from watchlist">⭐</button>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-        <button onclick="openGTTSheet('${h.ticker}','${h.company}','${h.fitRating}',${h.fitScore},'${h.fullData?.technical?.support1||h.fullData?.technical?.support2||0}')" style="background:#00d4aa;color:#000;border:none;border-radius:8px;padding:10px;font-weight:800;font-size:13px;cursor:pointer">🎯 Place GTT</button>
-        <button onclick="loadWL(${i})" style="background:#38bdf818;color:#38bdf8;border:1px solid #38bdf833;border-radius:8px;padding:10px;font-weight:700;font-size:13px;cursor:pointer">📊 View Analysis</button>
-      </div>
-    </div>`;
-  }).join("");
-}
-
-function removeFromWatchlist(ticker){
-  let wl=loadWatchlist().filter(w=>w.ticker!==ticker);
-  saveWatchlist(wl);
-  updateWatchCount();
-  renderWatchlist();
-  renderHistory();
-}
-
-function loadWL(i){
-  const wl=loadWatchlist();if(!wl[i])return;
-  let d=wl[i].fullData||wl[i];
-  if(!d||typeof d!=="object")return;
-  if(!d.fundamental)d.fundamental={};
-  if(!d.technical)d.technical={};
-  // Use saved score — do NOT recalculate so score matches what was shown when added to watchlist
-  if(!d.scoring)d.scoring={fundamentalScore:0,technicalScore:0,commentaryScore:0,fundamentalBreakdown:[],technicalBreakdown:[],commentaryBreakdown:[]};
-  if(!d.fitScore&&wl[i].fitScore)d.fitScore=wl[i].fitScore;
-  if(!d.fitRating&&wl[i].fitRating)d.fitRating=wl[i].fitRating;
-  currentData=d;showResult(d);switchTab("analyse");
-}
-
 // ══════════════════════════════════════════════════════════
 // NSE SYMBOL SEARCH
 // ══════════════════════════════════════════════════════════
 const NSE_JSON_URL = "https://tbwrsx-cloud.github.io/isa/nse-symbols.json";
 let _nseLoaded = false;
 
+// Load NSE symbols on startup
 async function loadNSEDB(){
   if(window._nseDB&&window._nseDB.length) return;
   try{
-    const cached=localStorage.getItem("isa_nse_db");
-    const age=parseInt(localStorage.getItem("isa_nse_db_age")||"0");
-    if(cached&&Date.now()-age<7*24*3600*1000){ window._nseDB=JSON.parse(cached); _nseLoaded=true; return; }
-    const r=await fetch(NSE_JSON_URL); if(!r.ok) return;
-    window._nseDB=await r.json(); _nseLoaded=true;
-    try{ localStorage.setItem("isa_nse_db",JSON.stringify(window._nseDB)); localStorage.setItem("isa_nse_db_age",Date.now().toString()); }catch(_){}
-  }catch(e){ console.log("NSE DB load failed:",e.message); }
+    const cached = localStorage.getItem("isa_nse_db");
+    const age    = parseInt(localStorage.getItem("isa_nse_db_age")||"0");
+    const week   = 7*24*3600*1000;
+    if(cached && Date.now()-age < week){
+      window._nseDB = JSON.parse(cached);
+      _nseLoaded = true;
+      return;
+    }
+    const r = await fetch(NSE_JSON_URL);
+    if(!r.ok) return;
+    const data = await r.json();
+    window._nseDB = data;
+    _nseLoaded = true;
+    try{
+      localStorage.setItem("isa_nse_db", JSON.stringify(data));
+      localStorage.setItem("isa_nse_db_age", Date.now().toString());
+    }catch(_){}
+  }catch(e){ console.log("NSE DB load failed:", e.message); }
 }
 
+// Search NSE DB — returns [{symbol, name}]
 function nseSearch(q){
   if(!window._nseDB||!q||q.length<1) return [];
-  const ql=q.toLowerCase().trim();
-  const results=[];
+  const ql = q.toLowerCase().trim();
+  const results = [];
+  // Exact symbol match first
   for(const s of window._nseDB){
     if(s[0].toLowerCase()===ql) results.unshift({symbol:s[0],name:s[1]});
     else if(results.length<20&&(s[0].toLowerCase().startsWith(ql)||s[1].toLowerCase().includes(ql)))
@@ -1399,12 +881,14 @@ function nseSearch(q){
   return results.slice(0,10);
 }
 
+// Show dropdown
 function showNSEDropdown(results){
-  const dd=document.getElementById("nseDropdown"); if(!dd) return;
+  const dd = document.getElementById("nseDropdown");
+  if(!dd) return;
   if(!results.length){ dd.style.display="none"; return; }
-  dd.style.display="block";
-  dd.innerHTML=results.map(r=>`
-    <div onclick="selectNSESymbol('${r.symbol}','${r.name.replace(/'/g,"\'")}')"
+  dd.style.display = "block";
+  dd.innerHTML = results.map(r=>`
+    <div onclick="selectNSESymbol('${r.symbol}','${r.name.replace(/'/g,"\'")}'')"
       style="padding:11px 13px;border-bottom:1px solid #1e2d45;cursor:pointer;display:flex;justify-content:space-between;align-items:center;-webkit-tap-highlight-color:transparent"
       onmousedown="event.preventDefault()">
       <div>
@@ -1415,342 +899,32 @@ function showNSEDropdown(results){
     </div>`).join("");
 }
 
-function hideNSEDropdown(){ const dd=document.getElementById("nseDropdown"); if(dd) dd.style.display="none"; }
+function hideNSEDropdown(){
+  const dd = document.getElementById("nseDropdown");
+  if(dd) dd.style.display="none";
+}
 
-function selectNSESymbol(symbol,name){
-  document.getElementById("scripInput").value=symbol;
+function selectNSESymbol(symbol, name){
+  document.getElementById("scripInput").value = symbol;
   hideNSEDropdown();
   analyze();
 }
 
+// Wire up input events
 function initNSESearch(){
-  const inp=document.getElementById("scripInput"); if(!inp) return;
-  inp.addEventListener("input",()=>{
-    const q=inp.value.trim();
+  const inp = document.getElementById("scripInput");
+  if(!inp) return;
+  inp.addEventListener("input", ()=>{
+    const q = inp.value.trim();
     if(q.length<1){ hideNSEDropdown(); return; }
-    showNSEDropdown(nseSearch(q));
+    const results = nseSearch(q);
+    showNSEDropdown(results);
   });
-  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ hideNSEDropdown(); analyze(); } if(e.key==="Escape") hideNSEDropdown(); });
-  inp.addEventListener("blur",()=>{ setTimeout(hideNSEDropdown,150); });
-}
-
-// ══════════════════════════════════════════════════════════
-// TRENDS & REFRESH
-// ══════════════════════════════════════════════════════════
-
-// ── Render Trends tab ─────────────────────────────────────
-function renderTrends(){
-  const el=document.getElementById("trendsList");
-  if(!el)return;
-  const hist=loadHist();
-  // Only show stocks that have 2+ rating history entries
-  const withTrends=hist.filter(h=>(h.ratingHistory||h.fullData?.ratingHistory||[]).length>=1);
-  if(!withTrends.length){
-    el.innerHTML=`<div class="empty"><div style="font-size:34px;margin-bottom:10px">📈</div><div style="font-size:13px">No trend data yet.</div><div style="font-size:11px;margin-top:4px;color:#64748b">Re-analyse stocks each quarter to build trend history.</div></div>`;
-    return;
-  }
-  const ratingColor=r=>r==="Strong Buy"?"#22c55e":r==="Buy"?"#00d4aa":r==="Hold"?"#f59e0b":"#ef4444";
-  const ratingShort=r=>r==="Strong Buy"?"SBuy":r==="Buy"?"Buy":r==="Hold"?"Hold":"Avoid";
-  el.innerHTML=withTrends.map(h=>{
-    const snapshots=(h.ratingHistory||h.fullData?.ratingHistory||[]);
-    const latest=snapshots[snapshots.length-1];
-    const prev=snapshots[snapshots.length-2];
-    const trend=!prev?null:latest.score>prev.score?"↑":latest.score<prev.score?"↓":"→";
-    const trendCol=!trend?"":(trend==="↑"?"#22c55e":trend==="↓"?"#ef4444":"#64748b");
-    const c=ratingColor(h.fitRating);
-    return`<div class="card" style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div>
-          <div style="font-weight:700;font-size:14px;margin-bottom:3px">${h.company}</div>
-          <div style="display:flex;gap:5px;align-items:center">
-            <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf844;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">${h.ticker}</span>
-            <span style="background:${c}22;color:${c};border:1px solid ${c}44;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">${h.fitRating}</span>
-            ${trend?`<span style="font-size:18px;font-weight:800;color:${trendCol}">${trend}</span>`:""}
-          </div>
-        </div>
-        <button onclick="refreshFromTicker('${h.ticker}')" style="background:#7c3aed18;color:#a78bfa;border:1px solid #7c3aed44;border-radius:7px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer">🔄 Refresh</button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(${Math.min(snapshots.length,4)},1fr);gap:5px">
-        ${snapshots.slice(-4).map((s,idx,arr)=>{
-          const prevS=idx>0?arr[idx-1]:null;
-          const sc=ratingColor(s.rating);
-          const chg=prevS?(s.score-prevS.score):null;
-          const chgStr=chg===null?"":(chg>0?`<div style="color:#22c55e;font-size:9px">+${chg}</div>`:(chg<0?`<div style="color:#ef4444;font-size:9px">${chg}</div>`:`<div style="color:#64748b;font-size:9px">—</div>`));
-          return`<div style="background:#0a0e1a;border:1px solid #1e2d45;border-radius:8px;padding:8px;text-align:center">
-            <div style="color:#64748b;font-size:9px;margin-bottom:4px">${s.quarter}</div>
-            <div style="font-size:20px;font-weight:800;font-family:monospace;color:${sc}">${s.score}</div>
-            <div style="background:${sc}22;color:${sc};border-radius:4px;padding:1px 4px;font-size:9px;font-weight:700;margin:3px 0">${ratingShort(s.rating)}</div>
-            ${chgStr}
-            <div style="color:#64748b;font-size:9px;margin-top:2px">Rs.${s.price}</div>
-          </div>`;
-        }).join("")}
-      </div>
-    </div>`;
-  }).join("");
-}
-
-// ── Refresh from result card ──────────────────────────────
-function refreshAnalysis(){
-  if(!currentData?.ticker)return;
-  document.getElementById("scripInput").value=currentData.ticker;
-  analyze();
-}
-
-// ── Refresh from history entry ────────────────────────────
-function refreshFromHist(histIdx){
-  const l=loadHist();
-  const h=l[histIdx];
-  if(!h)return;
-  document.getElementById("scripInput").value=h.ticker;
-  switchTab("analyse");
-  analyze();
-}
-
-// ── Refresh from trends tab ───────────────────────────────
-function refreshFromTicker(ticker){
-  document.getElementById("scripInput").value=ticker;
-  switchTab("analyse");
-  analyze();
-}
-
-// ══════════════════════════════════════════════════════════
-// GTT ORDERS
-// ══════════════════════════════════════════════════════════
-let gttCurrentTicker = null;
-let gttCurrentTxn = "BUY";
-let gttCurrentInstrKey = null;
-
-// ── Fetch GTT orders from Upstox ──────────────────────────
-async function loadGTTOrders(){
-  const tok = getAlgoTok();
-  const el = document.getElementById("gttList");
-  const st = document.getElementById("gttStatus");
-  if(!tok){
-    if(st) st.textContent = "Login required — go to Portfolio tab first";
-    if(el) el.innerHTML = `<div class="card" style="text-align:center;padding:20px"><div style="color:#64748b;font-size:12px;margin-bottom:12px">Upstox login needed to view GTT orders</div><button onclick="switchTab('portfolio')" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;font-size:13px;cursor:pointer">Login via Portfolio tab →</button></div>`;
-    return;
-  }
-  if(st) st.textContent = "Loading GTT orders…";
-  try{
-    // GTT API is v3, fetch active + triggered orders
-    const r = await fetch(`https://api.upstox.com/v3/order/gtt`, {
-      headers:{"Authorization":`Bearer ${tok}`,"Accept":"application/json"}
-    });
-    if(r.status===401){ setAlgoTok(""); if(st)st.textContent="Session expired. Login again via Portfolio tab."; return; }
-    if(!r.ok) throw new Error(`GTT API error ${r.status}`);
-    const d = await r.json();
-    renderGTTList(d.data||[]);
-  }catch(e){
-    if(st) st.textContent = "Error: "+e.message;
-    console.error(e);
-  }
-}
-
-// ── Render GTT orders list ────────────────────────────────
-function renderGTTList(allOrders){
-  // Filter locally — API doesn't support status query param
-  // Show active (SCHEDULED/OPEN) orders first, then others
-  const orders = allOrders.filter(o=>{
-    const s = ((o.rules||[])[0]?.status||"").toUpperCase();
-    return s !== "TRIGGERED" && s !== "CANCELLED" && s !== "EXPIRED";
+  inp.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ hideNSEDropdown(); analyze(); }
+    if(e.key==="Escape") hideNSEDropdown();
   });
-  const triggered = allOrders.filter(o=>{
-    const s = ((o.rules||[])[0]?.status||"").toUpperCase();
-    return s === "TRIGGERED";
-  });
-  const combined = [...orders, ...triggered];
-  // Replace orders with combined for rendering
-  return _renderGTTListInternal(combined, allOrders.length);
-}
-function _renderGTTListInternal(orders, totalCount){
-  const el = document.getElementById("gttList");
-  const st = document.getElementById("gttStatus");
-  if(!orders.length){
-    if(st) st.textContent = "No GTT orders found";
-    if(el) el.innerHTML = `<div class="empty"><div style="font-size:34px;margin-bottom:10px">🎯</div><div style="font-size:13px">No GTT orders placed yet.</div><div style="font-size:11px;margin-top:4px;color:#64748b">Add stocks to Watchlist and place GTT orders.</div></div>`;
-    return;
-  }
-  if(st) st.textContent = `${orders.length} order${orders.length>1?"s":""} (${totalCount} total)`;
-  const statusColor = s => s==="SCHEDULED"||s==="OPEN"?"#22c55e":s==="TRIGGERED"?"#00d4aa":s==="FAILED"||s==="CANCELLED"||s==="EXPIRED"?"#ef4444":"#f59e0b";
-  const statusIcon  = s => s==="SCHEDULED"||s==="OPEN"?"●":s==="TRIGGERED"?"✓":s==="FAILED"||s==="CANCELLED"?"✕":"⏱";
-  el.innerHTML = orders.map(o=>{
-    const rule = (o.rules||[])[0]||{};
-    const sym = o.trading_symbol||o.instrument_token?.split("|")[1]||"--";
-    const txn = o.transaction_type||rule.transaction_type||"--";
-    const qty = o.quantity||rule.quantity||0;
-    const trigger = rule.trigger_price||0;
-    const limit   = rule.limit_price||rule.order_price||0;
-    // Status is in rules[0].status per docs
-    const status  = (rule.status||"SCHEDULED").toUpperCase();
-    const sc = statusColor(status);
-    return`<div class="card" style="margin-bottom:9px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div>
-          <div style="font-weight:700;font-size:15px;margin-bottom:3px">${sym}</div>
-          <div style="display:flex;gap:5px;align-items:center">
-            <span style="background:${txn==="BUY"?"#22c55e22":"#ef444422"};color:${txn==="BUY"?"#22c55e":"#ef4444"};border:1px solid ${txn==="BUY"?"#22c55e44":"#ef444444"};border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">${txn}</span>
-            <span style="background:${sc}22;color:${sc};border:1px solid ${sc}44;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">${statusIcon(status)} ${status}</span>
-          </div>
-        </div>
-        <div style="text-align:right;font-size:10px;color:#64748b">${o.created_at?new Date(o.created_at/1000).toLocaleDateString("en-IN"):""}</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-        <div style="background:#0a0e1a;border-radius:6px;padding:7px;text-align:center">
-          <div style="color:#64748b;font-size:9px;margin-bottom:2px">QTY</div>
-          <div style="font-weight:700;font-family:monospace;font-size:13px">${qty}</div>
-        </div>
-        <div style="background:#0a0e1a;border-radius:6px;padding:7px;text-align:center">
-          <div style="color:#64748b;font-size:9px;margin-bottom:2px">TRIGGER</div>
-          <div style="font-weight:700;font-family:monospace;font-size:13px;color:#f59e0b">₹${trigger}</div>
-        </div>
-        <div style="background:#0a0e1a;border-radius:6px;padding:7px;text-align:center">
-          <div style="color:#64748b;font-size:9px;margin-bottom:2px">LIMIT</div>
-          <div style="font-weight:700;font-family:monospace;font-size:13px">₹${limit}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join("");
-}
-
-// ── GTT Sheet controls ────────────────────────────────────
-function openGTTSheet(ticker, company, rating, score, suggestedPrice){
-  gttCurrentTicker = ticker;
-  gttCurrentInstrKey = null;
-  gttCurrentTxn = "BUY";
-  const c = rc(rating);
-  document.getElementById("gttSheetTitle").textContent = company;
-  document.getElementById("gttSheetBadges").innerHTML =
-    `<span style="background:#38bdf833;color:#38bdf8;border:2px solid #38bdf866;border-radius:6px;padding:3px 12px;font-size:15px;font-weight:800;margin-right:6px;font-family:monospace">${ticker}</span>`+
-    `<span style="background:${c}22;color:${c};border:1px solid ${c}44;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">${rating} ${score}/100</span>`;
-  // Show ticker in submit button as safety reminder
-  document.getElementById("gttSubmitBtn").textContent = `Place GTT — ${ticker} →`;
-  document.getElementById("gttQty").value = "";
-  document.getElementById("gttTrigger").value = suggestedPrice&&suggestedPrice!="0"?suggestedPrice:"";
-  document.getElementById("gttLimit").value = "";
-  document.getElementById("gttSheetError").textContent = "";
-  setGTTTxn("BUY");
-  const sheet = document.getElementById("gttSheet");
-  sheet.style.display = "flex";
-}
-
-function closeGTTSheet(){
-  document.getElementById("gttSheet").style.display = "none";
-  gttCurrentTicker = null;
-  gttCurrentInstrKey = null;
-}
-
-function setGTTTxn(txn){
-  gttCurrentTxn = txn;
-  const buyBtn  = document.getElementById("gttBuyBtn");
-  const sellBtn = document.getElementById("gttSellBtn");
-  if(txn==="BUY"){
-    buyBtn.style.cssText  = "padding:11px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;border:2px solid #22c55e;background:#22c55e22;color:#22c55e";
-    sellBtn.style.cssText = "padding:11px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid #1e2d45;background:#111827;color:#64748b";
-  } else {
-    sellBtn.style.cssText = "padding:11px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;border:2px solid #ef4444;background:#ef444422;color:#ef4444";
-    buyBtn.style.cssText  = "padding:11px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;border:1px solid #1e2d45;background:#111827;color:#64748b";
-  }
-}
-
-// ── Submit GTT order ──────────────────────────────────────
-async function submitGTT(){
-  const tok = getAlgoTok();
-  if(!tok){ document.getElementById("gttSheetError").textContent="Login required. Go to Portfolio tab."; return; }
-  const qty     = parseInt(document.getElementById("gttQty").value);
-  const trigger = parseFloat(document.getElementById("gttTrigger").value);
-  const limit   = parseFloat(document.getElementById("gttLimit").value);
-  const errEl   = document.getElementById("gttSheetError");
-  const btn     = document.getElementById("gttSubmitBtn");
-  if(!qty||qty<1){ errEl.textContent="Enter valid quantity"; return; }
-  if(!trigger||trigger<=0){ errEl.textContent="Enter valid trigger price"; return; }
-  if(!limit||limit<=0){ errEl.textContent="Enter valid limit price"; return; }
-  errEl.textContent = "";
-  btn.textContent = "Resolving symbol…"; btn.disabled = true;
-  try{
-    // Step 1: ALWAYS resolve instrument key fresh — exact match only
-    gttCurrentInstrKey = null;
-    btn.textContent = "Verifying symbol…";
-    const searchUrl = `${UPSTOX_BASE}/instruments/search?query=${encodeURIComponent(gttCurrentTicker)}&exchanges=NSE&segments=EQ&records=15`;
-    const sr = await fetch(searchUrl, {headers:{"Authorization":`Bearer ${tok}`,"Accept":"application/json"}});
-    const sd = await sr.json();
-    const items = (sd.data||[]).filter(x=>x.segment==="NSE_EQ");
-    // STRICT: Only accept exact trading_symbol match — never use first result
-    const exact = items.find(x=>x.trading_symbol?.toUpperCase()===gttCurrentTicker.toUpperCase());
-    if(!exact){
-      // No exact match — show what was found and abort
-      const found = items.slice(0,3).map(x=>x.trading_symbol).join(", ");
-      throw new Error(
-        `"${gttCurrentTicker}" not found exactly on NSE.\n` +
-        `Search returned: ${found||"nothing"}.\n` +
-        `Please use the exact NSE trading symbol.`
-      );
-    }
-    gttCurrentInstrKey = exact.instrument_key;
-    const resolvedSymbol = exact.trading_symbol;
-    const resolvedName = exact.name||exact.short_name||resolvedSymbol;
-    // Step 2: Final confirmation — show exact stock being ordered
-    btn.textContent = "Awaiting confirmation…"; btn.disabled=false;
-    const confirmed = confirm(
-      "⚠ CONFIRM GTT ORDER\n\n" +
-      "Stock: " + resolvedSymbol + "\n" +
-      "Action: " + gttCurrentTxn + " " + qty + " shares\n" +
-      "Trigger price: ₹" + trigger + "\n" +
-      "Limit price: ₹" + limit + "\n" +
-      "Product: Delivery (CNC)\n\n" +
-      "Tap OK to place on Upstox."
-    );
-    if(!confirmed){ btn.textContent="Place GTT Order →"; return; }
-    btn.textContent = "Placing GTT…"; btn.disabled=true;
-    // v3 GTT place order body
-    const body = {
-      type: "SINGLE",
-      instrument_token: gttCurrentInstrKey,
-      transaction_type: gttCurrentTxn,
-      quantity: qty,
-      product: "D",
-      rules:[{
-        strategy: "ENTRY",
-        trigger_type: gttCurrentTxn==="BUY"?"BELOW":"ABOVE",
-        trigger_price: trigger
-      }]
-    };
-    const r = await fetch(`https://api.upstox.com/v3/order/gtt/place`,{
-      method:"POST",
-      headers:{"Authorization":`Bearer ${tok}`,"Content-Type":"application/json","Accept":"application/json"},
-      body: JSON.stringify(body)
-    });
-    const d = await r.json();
-    if(!r.ok) throw new Error(d?.errors?.[0]?.message||d?.message||`GTT error ${r.status}`);
-    // Step 3: Success — remove from watchlist
-    removeFromWatchlist(gttCurrentTicker);
-    closeGTTSheet();
-    showToast(`✓ GTT placed for ${gttCurrentTicker}! Removed from watchlist.`, "#22c55e");
-    // Refresh GTT list in background
-    setTimeout(()=>{ if(document.getElementById("view-gtt").style.display==="block") loadGTTOrders(); }, 1000);
-  }catch(e){
-    errEl.textContent = e.message||"Failed to place GTT";
-    console.error(e);
-  } finally {
-    btn.textContent = "Place GTT Order →"; btn.disabled = false;
-  }
-}
-
-// ── Toast notification ────────────────────────────────────
-function showToast(msg, color="#00d4aa"){
-  let t = document.getElementById("appToast");
-  if(!t){
-    t = document.createElement("div");
-    t.id = "appToast";
-    t.style.cssText = "position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#111827;border:1px solid #1e2d45;border-radius:10px;padding:12px 20px;font-size:13px;font-weight:700;z-index:99999;transition:opacity 0.3s;white-space:nowrap;max-width:90vw;text-align:center";
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.color = color;
-  t.style.borderColor = color+"44";
-  t.style.opacity = "1";
-  t.style.display = "block";
-  clearTimeout(t._timer);
-  t._timer = setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.style.display="none",300); }, 3500);
+  inp.addEventListener("blur", ()=>{ setTimeout(hideNSEDropdown, 150); });
 }
 
 
